@@ -11,6 +11,11 @@ type UserRepository interface {
 	IsEmailExists(email string) (bool, error)
 	IsLoginExists(login string) (bool, error)
 	GetUserByEmail(email string) (*entities.User, error)
+	GetUserByID(userID int) (*entities.User, error)
+	GetPlaylistsByUserID(userID int) ([]entities.Playlist, error)
+	GetSubscriptionsByUserID(userID int) ([]int, error)
+	UpdateUserProfile(user *entities.User, userID int) error
+	GetUserProfile(userID int) (*entities.User, error)
 }
 
 type userRepository struct {
@@ -56,6 +61,85 @@ func (r *userRepository) GetUserByEmail(email string) (*entities.User, error) {
 	err := r.db.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Pass)
 	if err != nil {
 		log.Printf("Error querying user by email (%s): %v", email, err)
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetUserByID(userID int) (*entities.User, error) {
+	query := `SELECT login, email, pfp FROM users WHERE id = $1`
+	var user entities.User
+	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.Email, &user.PFP)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Printf("error querying user by ID: %v", err)
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetPlaylistsByUserID(userID int) ([]entities.Playlist, error) {
+	query := `SELECT id, title, cover FROM playlists WHERE author_id = $1`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		log.Printf("Error querying playlist by user ID: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	var playlists []entities.Playlist
+	for rows.Next() {
+		var playlist entities.Playlist
+		if err := rows.Scan(&playlist.ID, &playlist.Title, &playlist.Cover); err != nil {
+			log.Printf("error scanning playlist row: %v", err)
+			return nil, err
+		}
+		playlists = append(playlists, playlist)
+	}
+	return playlists, nil
+}
+
+func (r *userRepository) GetSubscriptionsByUserID(userID int) ([]int, error) {
+	query := `SELECT artist_id FROM users_artists WHERE user_id = $1 AND isLike = true`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		log.Printf("Error querying subs by user ID: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var subs []int
+	for rows.Next() {
+		var artistID int
+		if err := rows.Scan(&artistID); err != nil {
+			log.Printf("error scanning subs row: %v", err)
+			return nil, err
+		}
+		subs = append(subs, artistID)
+	}
+	return subs, nil
+}
+
+func (r *userRepository) UpdateUserProfile(user *entities.User, userID int) error {
+	query := `UPDATE users SET login = $1, email = $2, pass = $3, pfp = $4 WHERE id = $5`
+	_, err := r.db.Exec(query, user.Login, user.Email, user.Pass, user.PFP, userID)
+	if err != nil {
+		log.Printf("error updating user on database lvl: %v", err)
+		return err
+	}
+	return err
+}
+
+func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
+	query := `SELECT login, pfp FROM users WHERE id = $1`
+	var user entities.User
+	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		log.Printf("error querying user by ID: %v", err)
 		return nil, err
 	}
 	return &user, nil

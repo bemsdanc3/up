@@ -4,7 +4,10 @@ import (
 	"backend/internal/entities"
 	"backend/internal/usecase"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -16,11 +19,50 @@ import (
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type UserHandler struct {
-	usecase usecase.UserUsecase
+	usecase usecase.UserUseCase
 }
 
-func NewUserHandler(usecase usecase.UserUsecase) *UserHandler {
+func NewUserHandler(usecase usecase.UserUseCase) *UserHandler {
 	return &UserHandler{usecase: usecase}
+}
+
+func generateJWT(user entities.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(time.Hour * 1).Unix(),
+	})
+	return token.SignedString(jwtSecret)
+}
+
+func getUserIDFromCookie(r *http.Request) (int, error) {
+	cookie, err := r.Cookie("user_id")
+	if err != nil {
+		log.Printf("Error getting cookie: %v", err)
+		return 0, errors.New("user_id cookie not found")
+	}
+
+	userID, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		log.Printf("invalid user_id format: %v", err)
+		return 0, errors.New("invalid user_id format in cookie")
+	}
+	return userID, nil
+}
+
+func getUserIDFromRouter(r *http.Request) (int, error) {
+	vars := mux.Vars(r)
+
+	idStr, ok := vars["user_id"]
+	if !ok {
+		return 0, fmt.Errorf("parameter 'id' not found in route")
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid 'id' format in route: %s", idStr)
+	}
+
+	return id, nil
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -107,10 +149,86 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "login successful"})
 }
 
-func generateJWT(user entities.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 1).Unix(),
-	})
-	return token.SignedString(jwtSecret)
+func (h *UserHandler) GetUserDetailsByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "wrong method", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("error getting user id from cookie: %v", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := h.usecase.GetUserDetails(userID)
+	if err != nil {
+		log.Printf("error getting user details: %v", err)
+		http.Error(w, "error fetching user details", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
+func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, "method not allowed", http.StatusBadRequest)
+		return
+	}
+
+	var updatedUser entities.User
+	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
+		log.Printf("cant read updated user body: %v", err)
+		http.Error(w, "invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("Cant get user ID from cookie: %v", err)
+		http.Error(w, "invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	if userID <= 0 {
+		http.Error(w, "user ID can be less then zero", http.StatusBadRequest)
+		return
+	}
+
+	err = h.usecase.UpdateUserProfile(&updatedUser, userID)
+	if err != nil {
+		log.Printf("cant update user: %v", err)
+		http.Error(w, "failed to update user", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "user updated successfully"})
+}
+
+func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := getUserIDFromRouter(r)
+	if err != nil {
+		log.Printf("cant get user ID from cookie: %v", err)
+		http.Error(w, "invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.usecase.GetUserProfile(userID)
+	if err != nil {
+		log.Printf("error getting user by ID: %v", err)
+		http.Error(w, "error fetching user by ID", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+
 }
