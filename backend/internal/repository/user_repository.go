@@ -72,7 +72,7 @@ func (r *userRepository) GetUserByID(userID int) (*entities.User, error) {
 	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.Email, &user.PFP)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, err
 		}
 		log.Printf("error querying user by ID: %v", err)
 		return nil, err

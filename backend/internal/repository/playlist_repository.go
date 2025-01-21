@@ -12,6 +12,7 @@ type PlaylistRepository interface {
 	GetPlaylistByID(playlistID int) (entities.Playlist, error)
 	DeletePlaylistByID(playlistID int) error
 	EditPlaylistByID(playlist *entities.Playlist, playlistID int) error
+	GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error)
 }
 
 type playlistRepository struct {
@@ -110,4 +111,30 @@ func (r *playlistRepository) EditPlaylistByID(playlist *entities.Playlist, playl
 		return err
 	}
 	return err
+}
+
+func (r *playlistRepository) GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error) {
+	query := `SELECT id, title, creation_date, cover, description, ispublic FROM playlists WHERE author_id = $1`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		log.Printf("cant get playlists by user id on database lvl: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var playlists []entities.Playlist
+	for rows.Next() {
+		var playlist entities.Playlist
+		if err = rows.Scan(&playlist.ID,
+			&playlist.Title,
+			&playlist.CreationDate,
+			&playlist.Cover,
+			&playlist.Description,
+			&playlist.IsPublic); err != nil {
+			log.Printf("error scanning playlist row: %v", err)
+			return nil, err
+		}
+		playlists = append(playlists, playlist)
+	}
+	return playlists, nil
 }
