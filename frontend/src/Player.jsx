@@ -8,6 +8,7 @@ function Player() {
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1); // volume from 0 to 1
+  const [isMuted, setIsMuted] = useState(false);
 
   // Обновляем прогресс каждую секунду
   useEffect(() => {
@@ -62,18 +63,22 @@ function Player() {
     setIsPlaying(!isPlaying);
   };
 
-  // Функция для выключения музыки
-//   const stopMusic = () => {
-//     audioRef.current.pause();
-//     audioRef.current.currentTime = 0;
-//     setIsPlaying(false);
-//   };
-
   // Функция для изменения громкости
   const handleVolumeChange = (event) => {
     const newVolume = event.target.value;
     audioRef.current.volume = newVolume;
     setVolume(newVolume);
+    if (newVolume > 0) setIsMuted(false);
+  };
+
+  // Функция для включения/выключения звука
+  const toggleMute = () => {
+    if (isMuted) {
+      audioRef.current.volume = volume; // Восстановить предыдущую громкость
+    } else {
+      audioRef.current.volume = 0; // Выключить звук
+    }
+    setIsMuted(!isMuted);
   };
 
   return (
@@ -92,10 +97,9 @@ function Player() {
           preload="metadata"
         ></audio>
         <div id="playercontrols">
-            <button onClick={togglePlay}>
+          <button onClick={togglePlay}>
             {isPlaying ? 'Pause' : 'Play'}
-            </button>
-            {/* <button onClick={stopMusic}>Stop</button> */}
+          </button>
         </div>
         <div
           id="progress-bar-container"
@@ -121,6 +125,9 @@ function Player() {
           onChange={handleVolumeChange}
           className="volume-slider"
         />
+        <button onClick={toggleMute}>
+          {isMuted ? 'Unmute' : 'Mute'}
+        </button>
       </div>
     </div>
   );
