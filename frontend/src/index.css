@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap'); */
+
+* {
+  margin: 0;
+}
 
 body {
   width: 100vw;
@@ -14,26 +18,28 @@ body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  min-width: 100vw;
+  /* align-items: center; */
+  /* justify-content: center; */
 }
 
 #registration {
   position: relative;
-  top: -10%;
+  /* top: 30%; */
   background-color: red;
   padding: 15px;
   display: flex;
   flex-direction: column;
   border-radius: 15px;
   min-width: 500px;
+  max-width: 500px;
+  margin: auto;
 }
 
 #registration * {
-  font-family: "Bungee", serif;
+  /* font-family: "Bungee", serif; */
   margin: 5px;
   padding: 5px 10px;
-  
   border: none;
   outline: none;
   border-radius: 10px;
@@ -41,6 +47,16 @@ body {
 }
 
 #registration h1 {
-  font-family: "Bungee", serif;
+  /* font-family: "Bungee", serif; */
   background-color: transparent;
+}
+
+header {
+  position: relative;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  max-width: 100%;
+  padding: 10px;
+  background-color: aquamarine;
 }

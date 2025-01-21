@@ -1,14 +1,14 @@
 import { useState } from 'react'
 
-function LoginForm() {
-    const [showRegWin, setShowRegWin] = useState(true);
+function LoginForm({ logFunc }) {
+  const [isLogin, setIsLogin] = useState(true);
 
     const Register = async () => {
     try {
         const login = document.getElementById('loginInput')
         const email = document.getElementById('emailInput')
         const password = document.getElementById('passwordInput')
-      const loginRes = await fetch('http://localhost:8080/register',{
+      const loginRes = await fetch(`http://localhost:8080/register`,{
         method: 'POST',
         credentials: 'include',
         withCredentials: true,
@@ -23,7 +23,7 @@ function LoginForm() {
       });
       if (loginRes.ok) {
         console.log("salamalekum")
-        setShowRegWin(false);
+        logFunc();
       } else {
         const errorData = await loginRes.json();
         console.log(errorData.error);
@@ -33,18 +33,54 @@ function LoginForm() {
     }
     }
 
+    const Login = async () => {
+      try {
+          const email = document.getElementById('emailInput')
+          const password = document.getElementById('passwordInput')
+        const loginRes = await fetch(`http://localhost:8080/login`,{
+          method: 'POST',
+          credentials: 'include',
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json", 
+          },
+          body: JSON.stringify({
+            email: email.value,
+            pass: password.value,
+          }),
+        });
+        if (loginRes.ok) {
+          console.log("salamalekum")
+          logFunc();
+        } else {
+          const errorData = await loginRes.json();
+          console.log(errorData.error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
   return (
-    <>
-      {showRegWin && 
-      <div id="registration">
+    <> 
+      {!isLogin &&
+        <div id="registration">
         <h1>Регистрация</h1>
         <input id='emailInput' type="email" placeholder='Введите почту' />
         <input id='loginInput' type="text" placeholder='Введите логин' />
         <input id='passwordInput' type="password" placeholder='Введите пароль' />
         <button type='button' onClick={()=>Register()}>Зарегистрироваться</button>
-      </div>}
-      {!showRegWin && 
-      <h1>мрилр</h1>
+        <span onClick={()=> setIsLogin(!isLogin)}>Есть аккаунт</span>
+        </div>
+      }
+      {isLogin &&
+        <div id="registration">
+        <h1>Авторизация</h1>
+        <input id='emailInput' type="email" placeholder='Введите почту' />
+        <input id='passwordInput' type="password" placeholder='Введите пароль' />
+        <button type='button' onClick={()=>Login()}>Войти</button>
+        <span onClick={()=> setIsLogin(!isLogin)}>Нет аккаунта</span>
+      </div>
       }
     </>
   )
