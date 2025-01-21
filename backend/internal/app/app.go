@@ -21,16 +21,19 @@ func Run() {
 	userRepo := repository.NewUserRepository(database)
 	playlistRepo := repository.NewPlaylistRepository(database)
 	trackRepo := repository.NewTrackRepository(database)
+	albumRepo := repository.NewAlbumRepository(database)
 
 	// инициализация юзкейсов
 	userUsecase := usecase.NewUserUsecse(userRepo)
 	playlistUsecase := usecase.NewPlaylistUseCase(playlistRepo)
 	trackUsecase := usecase.NewTrackUsecase(trackRepo)
+	albumUsecase := usecase.NewAlbumUsecase(albumRepo)
 
 	// инициализация обработчиков
 	userHandler := server.NewUserHandler(userUsecase)
 	playlistHandler := server.NewPlaylistHandler(playlistUsecase)
 	trackHandler := server.NewTrackHandler(trackUsecase)
+	albumHandler := server.NewAlbumHandler(albumUsecase)
 
 	// урлы
 	r := mux.NewRouter()
@@ -56,6 +59,9 @@ func Run() {
 	authRouter.HandleFunc("/track/create", trackHandler.CreateTrack).Methods(http.MethodPost)
 	authRouter.HandleFunc("/track/delete/{track_id}", trackHandler.DeleteTrackByID).Methods(http.MethodDelete)
 	authRouter.HandleFunc("/track/view/{track_id}", trackHandler.GetTrackByID).Methods(http.MethodGet)
+
+	//запросы с альбомами
+	authRouter.HandleFunc("/album/create", albumHandler.CreateAlbum).Methods(http.MethodPost)
 
 	//статическая папка для треков
 	setupStaticFileServer(r)
