@@ -10,6 +10,7 @@ type PlaylistUseCase interface {
 	GetPlaylistByID(playlistID int) (entities.Playlist, error)
 	DeletePlaylistByID(playlistID int) error
 	EditPlaylistByID(playlist *entities.Playlist, playlistID int) error
+	GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error)
 }
 
 type playlistUseCase struct {
@@ -34,4 +35,8 @@ func (u *playlistUseCase) DeletePlaylistByID(playlistID int) error {
 
 func (u *playlistUseCase) EditPlaylistByID(playlist *entities.Playlist, playlistID int) error {
 	return u.repo.EditPlaylistByID(playlist, playlistID)
+}
+
+func (u *playlistUseCase) GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error) {
+	return u.repo.GetAllPlaylistsByUserID(userID)
 }

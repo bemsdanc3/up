@@ -151,3 +151,28 @@ func (h *PlaylistHandler) EditPlaylistByID(w http.ResponseWriter, r *http.Reques
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "playlist edited successfully"})
 }
+
+func (h *PlaylistHandler) GetAllPlaylistsByUserID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("Error extracting userID: %v", err)
+		http.Error(w, "invalid id in cookie", http.StatusBadRequest)
+		return
+	}
+	log.Printf("Extracted userID: %d", userID)
+
+	playlists, err := h.useCase.GetAllPlaylistsByUserID(userID)
+	if err != nil {
+		log.Printf("Cant get playlists by user id: %v", err)
+		http.Error(w, "error fetching playlists by user id", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlists)
+}
