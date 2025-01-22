@@ -27,8 +27,8 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *userRepository) CreateUser(user *entities.User) error {
-	query := `INSERT INTO users (login, email, pass) VALUES ($1, $2, $3)`
-	_, err := r.db.Exec(query, user.Login, user.Email, user.Pass)
+	query := `INSERT INTO users (login, email, pass) VALUES ($1, $2, $3) RETURNING id`
+	err := r.db.QueryRow(query, user.Login, user.Email, user.Pass).Scan(&user.ID)
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
 	}

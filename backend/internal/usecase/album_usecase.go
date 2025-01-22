@@ -7,6 +7,8 @@ import (
 
 type AlbumUsecase interface {
 	CreateAlbum(album *entities.Album) error
+	DeleteAlbumByID(albumID int) error
+	EditAlbumByID(album *entities.Album, albumID int) error
 }
 
 type albumUsecase struct {
@@ -21,4 +23,12 @@ func NewAlbumUsecase(repo repository.AlbumRepository) AlbumUsecase {
 
 func (u *albumUsecase) CreateAlbum(album *entities.Album) error {
 	return u.repo.CreateAlbum(album)
+}
+
+func (u *albumUsecase) DeleteAlbumByID(albumID int) error {
+	return u.repo.DeleteAlbumByID(albumID)
+}
+
+func (u *albumUsecase) EditAlbumByID(album *entities.Album, albumID int) error {
+	return u.repo.EditAlbumByID(album, albumID)
 }

@@ -3,12 +3,11 @@ package server
 import (
 	"backend/internal/entities"
 	"backend/internal/usecase"
+	"backend/pkg/utils"
 	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"strconv"
+	"path/filepath"
 )
 
 type PlaylistHandler struct {
@@ -23,34 +22,50 @@ func NewPlaylistHandler(useCase usecase.PlaylistUseCase) *PlaylistHandler {
 	return &PlaylistHandler{useCase: useCase}
 }
 
-func getPlaylistIDFromRouter(r *http.Request) (int, error) {
-	vars := mux.Vars(r)
-
-	idStr, ok := vars["id"]
-	if !ok {
-		return 0, fmt.Errorf("parameter 'id' not found in route")
-	}
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid 'id' format in route: %s", idStr)
-	}
-
-	return id, nil
-}
-
-// ПОФИКСИТЬ ЧТОБЫ СОЗДАВАТЬ МОГ ТОЛЬКО АВТОРИЗИРОВАННЫЙ ПОЛЬЗОВАТЕЛЬ
 func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	var newPlaylist entities.Playlist
-	if err := json.NewDecoder(r.Body).Decode(&newPlaylist); err != nil {
-		log.Printf("Error decoding playlist body in json: %v", err)
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+	// Ограничение на размер файла (например, 10MB)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		log.Printf("error parsing form: %v", err)
+		http.Error(w, "invalid form data", http.StatusBadRequest)
 		return
 	}
+
+	// Получение файла из `form-data`
+	file, handler, err := r.FormFile("cover")
+	if err != nil {
+		log.Printf("error retrieving the file: %v", err)
+		http.Error(w, "error retrieving the file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	uploadDir := "./uploads/cover-playlist/"
+	playlistCoverPath, err := utils.UploadFile(file, handler, uploadDir)
+	if err != nil {
+		log.Printf("error uploading track file: %v", err)
+		http.Error(w, "failed to upload track", http.StatusInternalServerError)
+		return
+	}
+	playlistCoverLink := "localhost:8080/uploads/cover-playlist/" + filepath.Base(playlistCoverPath)
+
+	var newPlaylist entities.Playlist
+	newPlaylist.Title = r.FormValue("title")
+	newPlaylist.Description = r.FormValue("description")
+	isPublicStr := r.FormValue("is_public")
+	isPublic := false // Значение по умолчанию
+
+	if isPublicStr == "true" {
+		isPublic = true
+	} else if isPublicStr == "false" {
+		isPublic = false
+	}
+	newPlaylist.IsPublic = isPublic
+	newPlaylist.Cover = playlistCoverLink
 
 	if err := h.useCase.CreatePlaylist(&newPlaylist); err != nil {
 		log.Printf("Error creating playlist: %v", err)
@@ -65,7 +80,7 @@ func (h *PlaylistHandler) GetPlaylistByID(w http.ResponseWriter, r *http.Request
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	playlistID, err := getPlaylistIDFromRouter(r)
+	playlistID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("invalid playlist id: %v", err)
 		http.Error(w, "invalid route parameter", http.StatusBadRequest)
@@ -130,15 +145,10 @@ func (h *PlaylistHandler) EditPlaylistByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	playlistID, err := getPlaylistIDFromRouter(r)
+	playlistID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("invalid playlist id: %v", err)
 		http.Error(w, "invalid route parameter", http.StatusBadRequest)
-		return
-	}
-
-	if playlistID <= 0 {
-		http.Error(w, "Invalid playlist ID", http.StatusBadRequest)
 		return
 	}
 
@@ -175,4 +185,35 @@ func (h *PlaylistHandler) GetAllPlaylistsByUserID(w http.ResponseWriter, r *http
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(playlists)
+}
+
+func (h *PlaylistHandler) AddTrackToPlaylist(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var requestBody struct {
+		PlaylistID int `json:"playlist_id,omitempty"`
+		TrackID    int `json:"track_id,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Printf("error reading body: %v", err)
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	if requestBody.PlaylistID <= 0 || requestBody.TrackID <= 0 {
+		http.Error(w, "someone of ID is less then zero", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.useCase.AddTrackToPlaylist(requestBody.PlaylistID, requestBody.TrackID); err != nil {
+		log.Printf("error adding track to playlist: %v", err)
+		http.Error(w, "failed to add track to playlist", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"message": "track added to playlist"})
 }

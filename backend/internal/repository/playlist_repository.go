@@ -13,6 +13,7 @@ type PlaylistRepository interface {
 	DeletePlaylistByID(playlistID int) error
 	EditPlaylistByID(playlist *entities.Playlist, playlistID int) error
 	GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error)
+	AddTrackToPlaylist(playlistID, trackID int) error
 }
 
 type playlistRepository struct {
@@ -137,4 +138,14 @@ func (r *playlistRepository) GetAllPlaylistsByUserID(userID int) ([]entities.Pla
 		playlists = append(playlists, playlist)
 	}
 	return playlists, nil
+}
+
+func (r *playlistRepository) AddTrackToPlaylist(playlistID, trackID int) error {
+	query := `INSERT INTO playlist_tracks (playlist_id, track_id, add_date) VALUES ($1,$2, NOW())`
+	_, err := r.db.Exec(query, playlistID, trackID)
+	if err != nil {
+		log.Printf("error adding track to playlist on database lvl: %v", err)
+		return err
+	}
+	return err
 }

@@ -3,10 +3,8 @@ package server
 import (
 	"backend/internal/entities"
 	"backend/internal/usecase"
+	"backend/pkg/utils"
 	"encoding/json"
-	"fmt"
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -21,26 +19,6 @@ type TrackHandler struct {
 
 func NewTrackHandler(usecase usecase.TrackUsecase) *TrackHandler {
 	return &TrackHandler{usecase: usecase}
-}
-
-func getTrackIDFromRouter(r *http.Request) (int, error) {
-	vars := mux.Vars(r)
-
-	idStr, ok := vars["track_id"]
-	if !ok {
-		return 0, fmt.Errorf("parameter 'id' not found in route")
-	}
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid 'id' format in route: %s", idStr)
-	}
-
-	if id <= 0 {
-		return 0, fmt.Errorf("id can be less then zero")
-	}
-
-	return id, nil
 }
 
 func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
@@ -66,53 +44,24 @@ func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Генерация уникального имени файла
-	uniqueID := uuid.New().String()
-	fileExt := filepath.Ext(handler.Filename)
-	uniqueFileName := uniqueID + fileExt
-
-	// Генерация пути для сохранения файла
 	uploadDir := "./uploads/tracks/"
-	if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
-		log.Printf("error creating upload directory: %v", err)
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	filePath := filepath.Join(uploadDir, uniqueFileName)
-
-	// Сохранение файла на сервер
-	outFile, err := os.Create(filePath)
+	trackPath, err := utils.UploadFile(file, handler, uploadDir)
 	if err != nil {
-		log.Printf("error saving file: %v", err)
-		http.Error(w, "error saving file", http.StatusInternalServerError)
+		log.Printf("error uploading track file: %v", err)
+		http.Error(w, "failed to upload track", http.StatusInternalServerError)
 		return
 	}
-	defer outFile.Close()
-
-	if _, err := outFile.ReadFrom(file); err != nil {
-		log.Printf("error writing to file: %v", err)
-		http.Error(w, "error writing to file", http.StatusInternalServerError)
-		return
-	}
-
-	// Генерация ссылки на файл
-	trackLink := "localhost:8080/uploads/tracks/" + uniqueFileName
+	trackLink := "localhost:8080/uploads/tracks/" + filepath.Base(trackPath)
 
 	// Извлечение остальных данных трека из формы
-	duration, _ := strconv.Atoi(r.FormValue("duration"))
-	albumID, _ := strconv.Atoi(r.FormValue("album_id"))
-	genreID, _ := strconv.Atoi(r.FormValue("genre_id"))
+	var newTrack entities.Track
+	newTrack.Duration, err = strconv.Atoi(r.FormValue("duration"))
+	newTrack.Title = r.FormValue("title")
+	newTrack.AlbumID, err = strconv.Atoi(r.FormValue("album_id"))
+	newTrack.GenreID, err = strconv.Atoi(r.FormValue("genre_id"))
+	newTrack.ListenCount = 0
+	newTrack.TrackLink = trackLink
 
-	// Создание объекта трека
-	newTrack := entities.Track{
-		Duration:    duration,
-		AlbumID:     albumID,
-		GenreID:     genreID,
-		TrackLink:   trackLink,
-		ListenCount: 0, // Начальное значение
-	}
-
-	// Сохранение трека через usecase
 	if err := h.usecase.CreateTrack(&newTrack); err != nil {
 		log.Printf("error creating track: %v", err)
 		http.Error(w, "error creating track", http.StatusInternalServerError)
@@ -129,7 +78,7 @@ func (h *TrackHandler) DeleteTrackByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trackID, err := getTrackIDFromRouter(r)
+	trackID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get track id from route: %v", err)
 		http.Error(w, "invalid track id", http.StatusBadRequest)
@@ -163,7 +112,7 @@ func (h *TrackHandler) GetTrackByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trackID, err := getTrackIDFromRouter(r)
+	trackID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get track id from route: %v", err)
 		http.Error(w, "invalid track id", http.StatusBadRequest)
@@ -179,4 +128,21 @@ func (h *TrackHandler) GetTrackByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(track)
+}
+
+func (h *TrackHandler) GetAllTracks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tracks, err := h.usecase.GetAllTracks()
+	if err != nil {
+		log.Printf("cant get tracks: %v", err)
+		http.Error(w, "erorr fetching tracks", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
 }

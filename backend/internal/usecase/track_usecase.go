@@ -10,6 +10,7 @@ type TrackUsecase interface {
 	DeleteTrackByID(trackID int) error
 	GetTrackByID(trackID int) (*entities.Track, error)
 	GetTrackLinkByTrackID(trackID int) (*entities.Track, error)
+	GetAllTracks() ([]entities.Track, error)
 }
 
 type trackUsecase struct {
@@ -36,4 +37,8 @@ func (u *trackUsecase) GetTrackByID(trackID int) (*entities.Track, error) {
 
 func (u *trackUsecase) GetTrackLinkByTrackID(trackID int) (*entities.Track, error) {
 	return u.repo.GetTrackLinkByTrackID(trackID)
+}
+
+func (u *trackUsecase) GetAllTracks() ([]entities.Track, error) {
+	return u.repo.GetAllTracks()
 }

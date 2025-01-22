@@ -19,11 +19,15 @@ import (
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type UserHandler struct {
-	usecase usecase.UserUseCase
+	usecase         usecase.UserUseCase
+	playlistUsecase usecase.PlaylistUseCase
 }
 
-func NewUserHandler(usecase usecase.UserUseCase) *UserHandler {
-	return &UserHandler{usecase: usecase}
+func NewUserHandler(usecase usecase.UserUseCase, playlistUsecase usecase.PlaylistUseCase) *UserHandler {
+	return &UserHandler{
+		usecase:         usecase,
+		playlistUsecase: playlistUsecase,
+	}
 }
 
 func generateJWT(user entities.User) (string, error) {
@@ -49,10 +53,10 @@ func getUserIDFromCookie(r *http.Request) (int, error) {
 	return userID, nil
 }
 
-func getUserIDFromRouter(r *http.Request) (int, error) {
+func getIDFromRouter(r *http.Request) (int, error) {
 	vars := mux.Vars(r)
 
-	idStr, ok := vars["user_id"]
+	idStr, ok := vars["id"]
 	if !ok {
 		return 0, fmt.Errorf("parameter 'id' not found in route")
 	}
@@ -60,6 +64,10 @@ func getUserIDFromRouter(r *http.Request) (int, error) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return 0, fmt.Errorf("invalid 'id' format in route: %s", idStr)
+	}
+
+	if id <= 0 {
+		return 0, fmt.Errorf("id cant be less then zero")
 	}
 
 	return id, nil
@@ -88,6 +96,17 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	favoritePlaylist := &entities.Playlist{
+		Title:       "Любимые треки",
+		AuthorID:    newUser.ID,
+		Cover:       "",
+		Description: "Автоматически созданный плейлист для любимых треков",
+		IsPublic:    false,
+	}
+	if err := h.playlistUsecase.CreatePlaylist(favoritePlaylist); err != nil {
+		log.Printf("Error creating favorite playlist: %v", err)
+	}
+
 	json.NewEncoder(w).Encode(map[string]string{"message": "user created successfully"})
 }
 
@@ -214,7 +233,7 @@ func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := getUserIDFromRouter(r)
+	userID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get user ID from cookie: %v", err)
 		http.Error(w, "invalid user ID", http.StatusBadRequest)
