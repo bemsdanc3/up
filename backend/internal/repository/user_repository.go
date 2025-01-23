@@ -56,7 +56,7 @@ func (r *userRepository) IsLoginExists(login string) (bool, error) {
 }
 
 func (r *userRepository) GetUserByEmail(email string) (*entities.User, error) {
-	query := `SELECT id, email, pass FROM users WHERE email = $1`
+	query := `SELECT id, email, pass, role FROM users WHERE email = $1`
 	var user entities.User
 	err := r.db.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Pass)
 	if err != nil {
