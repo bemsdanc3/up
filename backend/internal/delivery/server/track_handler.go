@@ -14,11 +14,15 @@ import (
 )
 
 type TrackHandler struct {
-	usecase usecase.TrackUsecase
+	usecase         usecase.TrackUsecase
+	playlistUsecase usecase.PlaylistUseCase
 }
 
-func NewTrackHandler(usecase usecase.TrackUsecase) *TrackHandler {
-	return &TrackHandler{usecase: usecase}
+func NewTrackHandler(usecase usecase.TrackUsecase, playlistUsecase usecase.PlaylistUseCase) *TrackHandler {
+	return &TrackHandler{
+		usecase:         usecase,
+		playlistUsecase: playlistUsecase,
+	}
 }
 
 func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +55,7 @@ func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to upload track", http.StatusInternalServerError)
 		return
 	}
-	trackLink := "localhost:8080/uploads/tracks/" + filepath.Base(trackPath)
+	trackLink := "http://localhost:8080/uploads/tracks/" + filepath.Base(trackPath)
 
 	// Извлечение остальных данных трека из формы
 	var newTrack entities.Track
@@ -145,4 +149,61 @@ func (h *TrackHandler) GetAllTracks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tracks)
+}
+
+func (h *TrackHandler) LikeTrack(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("unauthorized: %v", err)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var requestBody struct {
+		TrackID int `json:"track_id"`
+	}
+	if err = json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Printf("error reading request body: %v", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
+	favoritePlaylist, err := h.playlistUsecase.GetFavoritePlaylist(userID)
+	if err != nil {
+		log.Printf("error getting favorite playlist: %v", err)
+		http.Error(w, "error fertching favorite playlist", http.StatusBadRequest)
+		return
+	}
+
+	if err = h.playlistUsecase.AddTrackToFavorite(favoritePlaylist.ID, requestBody.TrackID); err != nil {
+		log.Printf("error adding track to favorite playlist: %v", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{"message": "track liked successfully"})
+}
+
+func (h *TrackHandler) GetRandomTrack(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	track, err := h.usecase.GetRandomTrack()
+	if err != nil {
+		log.Printf("error retrieving random track: %v", err)
+		http.Error(w, "error retrieving random track", http.StatusInternalServerError)
+		return
+	}
+	if track == nil {
+		http.Error(w, "no tracks available", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(track)
 }

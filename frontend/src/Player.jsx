@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './player.css';
 
-function Player() {
+function Player({ track }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -9,6 +9,7 @@ function Player() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1); // volume from 0 to 1
   const [isMuted, setIsMuted] = useState(false);
+  const [playingTrackInfo, setPlayingTrackInfo] = useState({});
 
   // Обновляем прогресс каждую секунду
   useEffect(() => {
@@ -55,13 +56,34 @@ function Player() {
 
   // Функция для воспроизведения/паузы
   const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
+    if (playingTrackInfo?.track_link) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     } else {
+      getRandomTrack();
+    }
+  };
+  
+  useEffect(() => {
+    console.log(playingTrackInfo.track_link);
+
+    if (audioRef.current && playingTrackInfo.track_link) {
+      audioRef.current.src = playingTrackInfo.track_link;
+      audioRef.current.load(); // Загрузка трека
       audioRef.current.play();
     }
-    setIsPlaying(!isPlaying);
-  };
+  }, [playingTrackInfo]);
+
+  useEffect(()=>{
+    if (track) {
+      setPlayingTrackInfo(track)
+      console.log('now playing ' + track.title)
+    }
+  }, [track])
 
   // Функция для изменения громкости
   const handleVolumeChange = (event) => {
@@ -81,35 +103,77 @@ function Player() {
     setIsMuted(!isMuted);
   };
 
+  const getRandomTrack = async () => {
+    const response = await fetch('http://localhost:8080/tracks/random', {
+      method: 'GET',
+      credentials: 'include',
+      withCredentials: true,
+    })
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log(responseData);
+      setIsPlaying(true);
+      setPlayingTrackInfo(responseData);
+    } else {
+      console.log('жопа');
+    }
+  }
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    const handleError = () => {
+      console.error('Ошибка загрузки трека:', audio?.error);
+    };
+    audio.addEventListener('error', handleError);
+  
+    return () => {
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);  
+
   return (
     <div id="player">
       <div id="trackinfo">
-        <img src="" alt="" />
+        {playingTrackInfo &&
+        <>
+        <img src={playingTrackInfo.cover} alt="" />
         <div id="trackTextInfo">
-          <span id="tracktitle">asd</span>
-          <span id="trackauthor">fassdsa</span>
+          <span id="tracktitle">{playingTrackInfo.title}</span>
+          <span id="trackauthor">{playingTrackInfo.author_login}</span>
         </div>
+        </>
+        }
       </div>
       <div id="audioplayer">
+        {playingTrackInfo &&
         <audio
           ref={audioRef}
-          src="http://localhost:8080/uploads/tracks/cd424f05-f784-46b2-b045-27432e0deb87.mp3"
+          src={playingTrackInfo.track_link}
           preload="metadata"
-        ></audio>
+        ></audio>}
         <div id="playercontrols">
           <button onClick={togglePlay}>
             {isPlaying ? 'Pause' : 'Play'}
+          </button>
+          <button
+            id="nextBtn"
+            onClick={()=>{
+              getRandomTrack();
+            }}
+          >
+            Next
           </button>
         </div>
         <div
           id="progress-bar-container"
           ref={progressRef}
+          className={(isPlaying ? 'isPlaying ' : 'notPlaying ') + (playingTrackInfo ? 'trackLoaded' : 'trackNotLoaded')}
           onClick={handleProgressClick}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
         >
-          <div
+            <div
             id="progress-bar"
             style={{ width: `${progress}%` }}
           ></div>

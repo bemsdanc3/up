@@ -3,6 +3,8 @@ package usecase
 import (
 	"backend/internal/entities"
 	"backend/internal/repository"
+	"math/rand"
+	"time"
 )
 
 type TrackUsecase interface {
@@ -11,6 +13,7 @@ type TrackUsecase interface {
 	GetTrackByID(trackID int) (*entities.Track, error)
 	GetTrackLinkByTrackID(trackID int) (*entities.Track, error)
 	GetAllTracks() ([]entities.Track, error)
+	GetRandomTrack() (*entities.Track, error)
 }
 
 type trackUsecase struct {
@@ -41,4 +44,22 @@ func (u *trackUsecase) GetTrackLinkByTrackID(trackID int) (*entities.Track, erro
 
 func (u *trackUsecase) GetAllTracks() ([]entities.Track, error) {
 	return u.repo.GetAllTracks()
+}
+
+func (u *trackUsecase) GetRandomTrack() (*entities.Track, error) {
+	trackCount, err := u.repo.GetTrackCount()
+	if err != nil {
+		return nil, err
+	}
+	if trackCount == 0 {
+		return nil, nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	randomOffset := rand.Intn(trackCount)
+
+	track, err := u.repo.GetRandomTrack(randomOffset)
+	if err != nil {
+		return nil, err
+	}
+	return track, nil
 }

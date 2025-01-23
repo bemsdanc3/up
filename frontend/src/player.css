@@ -3,6 +3,7 @@
     bottom: 0;
     min-width: 100%;
     max-width: 100%;
+    height: 70px;
     background-color: aquamarine;
     display: flex;
     justify-content: space-between;
@@ -81,3 +82,10 @@ button:hover {
     margin: 5px 0;
 }
 
+#progress-bar-container.trackNotLoaded {
+    visibility: hidden;
+}
+
+#progress-bar-container.trackLoaded {
+    visibility: visible;
+}

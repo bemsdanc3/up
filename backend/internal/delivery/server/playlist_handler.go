@@ -51,11 +51,18 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "failed to upload track", http.StatusInternalServerError)
 		return
 	}
-	playlistCoverLink := "localhost:8080/uploads/cover-playlist/" + filepath.Base(playlistCoverPath)
+	playlistCoverLink := "http://localhost:8080/uploads/cover-playlist/" + filepath.Base(playlistCoverPath)
+	authorID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("error retrieving user ID: %v", err)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	var newPlaylist entities.Playlist
 	newPlaylist.Title = r.FormValue("title")
 	newPlaylist.Description = r.FormValue("description")
+	newPlaylist.AuthorID = authorID
 	isPublicStr := r.FormValue("is_public")
 	isPublic := false // Значение по умолчанию
 

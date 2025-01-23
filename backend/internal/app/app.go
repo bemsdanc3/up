@@ -32,7 +32,7 @@ func Run() {
 	// инициализация обработчиков
 	userHandler := server.NewUserHandler(userUsecase, playlistUsecase)
 	playlistHandler := server.NewPlaylistHandler(playlistUsecase)
-	trackHandler := server.NewTrackHandler(trackUsecase)
+	trackHandler := server.NewTrackHandler(trackUsecase, playlistUsecase)
 	albumHandler := server.NewAlbumHandler(albumUsecase)
 
 	// урлы
@@ -61,6 +61,8 @@ func Run() {
 	authRouter.HandleFunc("/tracks/delete/{id}", trackHandler.DeleteTrackByID).Methods(http.MethodDelete)
 	authRouter.HandleFunc("/tracks/view/{id}", trackHandler.GetTrackByID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/tracks/all", trackHandler.GetAllTracks).Methods(http.MethodGet)
+	authRouter.HandleFunc("/tracks/like", trackHandler.LikeTrack).Methods(http.MethodPost)
+	authRouter.HandleFunc("/tracks/random", trackHandler.GetRandomTrack).Methods(http.MethodGet)
 
 	//запросы с альбомами
 	authRouter.HandleFunc("/album/create", albumHandler.CreateAlbum).Methods(http.MethodPost)

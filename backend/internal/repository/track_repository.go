@@ -12,6 +12,8 @@ type TrackRepository interface {
 	GetTrackByID(trackID int) (*entities.Track, error)
 	GetTrackLinkByTrackID(trackID int) (*entities.Track, error)
 	GetAllTracks() ([]entities.Track, error)
+	GetTrackCount() (int, error)
+	GetRandomTrack(offset int) (*entities.Track, error)
 }
 
 type trackRepository struct {
@@ -136,4 +138,53 @@ func (r *trackRepository) GetAllTracks() ([]entities.Track, error) {
 	}
 
 	return tracks, nil
+}
+
+func (r *trackRepository) GetTrackCount() (int, error) {
+	var trackCount int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM tracks").Scan(&trackCount)
+	if err != nil {
+		return 0, err
+	}
+	return trackCount, nil
+}
+
+func (r *trackRepository) GetRandomTrack(offset int) (*entities.Track, error) {
+	query := `
+		SELECT 
+			t.id, 
+			t.title, 
+			t.duration, 
+			t.album_id, 
+			t.genre_id, 
+			t.tracklink, 
+			t.listen_count, 
+			a.cover AS album_cover, 
+			a.author_id AS album_author_id, 
+			u.login AS album_author_login
+		FROM 
+			tracks t
+		LEFT JOIN 
+			albums a ON t.album_id = a.id
+		LEFT JOIN 
+			users u ON a.author_id = u.id
+		LIMIT 1 OFFSET $1
+	`
+	var track entities.Track
+	err := r.db.QueryRow(query, offset).Scan(
+		&track.ID,
+		&track.Title,
+		&track.Duration,
+		&track.AlbumID,
+		&track.GenreID,
+		&track.TrackLink,
+		&track.ListenCount,
+		&track.Cover,
+		&track.AuthorID,
+		&track.AuthorLogin,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &track, nil
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/internal/entities"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -14,6 +15,8 @@ type PlaylistRepository interface {
 	EditPlaylistByID(playlist *entities.Playlist, playlistID int) error
 	GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error)
 	AddTrackToPlaylist(playlistID, trackID int) error
+	GetFavoritePlaylist(userID int) (*entities.Playlist, error)
+	AddTrackToFavorite(playlistID, trackID int) error
 }
 
 type playlistRepository struct {
@@ -25,8 +28,8 @@ func NewPlaylistRepository(db *sql.DB) PlaylistRepository {
 }
 
 func (r *playlistRepository) CreatePlaylist(playlist *entities.Playlist) error {
-	query := `INSERT INTO playlists (title, description, cover, ispublic) VALUES ($1,$2,$3,$4)`
-	_, err := r.db.Exec(query, playlist.Title, playlist.Description, playlist.Cover, playlist.IsPublic)
+	query := `INSERT INTO playlists (title, description, cover, ispublic, author_id) VALUES ($1,$2,$3,$4,$5)`
+	_, err := r.db.Exec(query, playlist.Title, playlist.Description, playlist.Cover, playlist.IsPublic, playlist.AuthorID)
 	if err != nil {
 		log.Printf("error creating playlist on database lvl: %v", err)
 	}
@@ -145,6 +148,36 @@ func (r *playlistRepository) AddTrackToPlaylist(playlistID, trackID int) error {
 	_, err := r.db.Exec(query, playlistID, trackID)
 	if err != nil {
 		log.Printf("error adding track to playlist on database lvl: %v", err)
+		return err
+	}
+	return err
+}
+
+func (r *playlistRepository) GetFavoritePlaylist(userID int) (*entities.Playlist, error) {
+	query := `SELECT id, title, cover, description, isPublic FROM playlists WHERE author_id = $1 AND title = $2`
+	row := r.db.QueryRow(query, userID, "Любимые треки")
+
+	var playlist entities.Playlist
+	if err := row.Scan(
+		&playlist.ID,
+		&playlist.Title,
+		&playlist.Cover,
+		&playlist.Description,
+		&playlist.IsPublic,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("favorite playlist not found")
+		}
+		return nil, err
+	}
+	return &playlist, nil
+}
+
+func (r *playlistRepository) AddTrackToFavorite(playlistID, trackID int) error {
+	query := `INSERT INTO playlist_tracks (playlist_id, track_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`
+	_, err := r.db.Exec(query, playlistID, trackID)
+	if err != nil {
+		log.Printf("error adding track to favorite on database lvl: %v", err)
 		return err
 	}
 	return err
