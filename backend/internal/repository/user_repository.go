@@ -132,7 +132,7 @@ func (r *userRepository) UpdateUserProfile(user *entities.User, userID int) erro
 }
 
 func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
-	query := `SELECT login, pfp FROM users WHERE id = $1`
+	query := `SELECT login, pfp, email FROM users WHERE id = $1`
 	var user entities.User
 	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP)
 	if err != nil {
