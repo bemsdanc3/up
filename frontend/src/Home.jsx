@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
+import PlusIcon from './assets/PlusIcon.svg?react';
+import PlayIcon from './assets/PlayIcon.svg?react';
+import PauseIcon from './assets/PauseIcon.svg?react';
 
-function Home({ trackPlay }) {
+function Home({ trackPlay, playWave }) {
   const [tracks, setTracks] = useState([])
   const [tracksLoaded, setTracksLoaded] = useState(false)
   const [playlists, setPlaylists] = useState([])
@@ -57,10 +60,30 @@ function Home({ trackPlay }) {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`; // Форматирует секунды с ведущим нулём
   };
 
+  const handleWavePlay = () => {
+    playWave();
+  };
+  
+  const handleTrackClick = (track) => {
+    trackPlay(track);
+  };  
+
   return (
     <>
         <div id="homePage">
-          <div id="myPlaylists">
+          <div id="myMedia">
+              <h2>Моя медиатека</h2>
+              <div id="createBtns">
+                <button>
+                  <PlusIcon />
+                  Новый плейлист
+                </button>
+                <button>
+                  <PlusIcon />
+                  Новый Альбом
+                </button>
+              </div>
+            <div id="myPlaylists">
             {playlists && playlists.length >=1 &&
               playlists.map((playlist)=>{
                 return (
@@ -71,67 +94,55 @@ function Home({ trackPlay }) {
                       <span>{playlist.title}</span>
                     </div>
                   </div>
-                  <div className="playlist">
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
-                  </div>
-                  <div className="playlist">
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
-                  </div>
-                  <div className="playlist">
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
-                  </div>
-                  <div className="playlist">
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
-                  </div>
-                  <div className="playlist">
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
-                  </div>
                   </>
                 )
               })
             }
+            </div>
           </div>
-          <div id="allTracks">
-            {tracks && tracks.length >= 1 &&
-              tracks.map((track)=>{
-                return (
-                  <div className="track"
-                    onClick={()=>{trackPlay(track)}}
-                  >
-                    <div className="trackLeftInfo">
-                      <img src={track.cover} alt="" />
-                      <div className="trackTextInfo">
-                        <span>{track.title}</span>
-                        <span>{track.author_login}</span>
+          <div id="homeRight">
+            <div id="myWave">
+              <button id="wavePlayBtn" onClick={()=>{handleWavePlay()}}>
+                {/* {!isWavePlaying ? <PlayIcon /> : <PauseIcon />} */}
+                <PlayIcon />
+                Play
+              </button>
+              <div id="homeGenres">
+                <button id="RockGanre">Rock</button>
+                <button id="PopGanre">Pop</button>
+                <button id="MetalGanre">Metal</button>
+                <button id="ClassicalGanre">Classical</button>
+                <button id="HipHopGanre">Hip-Hop</button>
+                {/* <button id="MusicForSexGanre">Music for sex</button> */}
+              </div>
+            </div>
+            <div id="allTracks">
+              {tracks && tracks.length >= 1 &&
+                tracks.map((track)=>{
+                  return (
+                    <div className="track"
+                      onClick={()=>{handleTrackClick(track)}}
+                    >
+                      <div className="trackLeftInfo">
+                        <img src={track.cover} alt="" />
+                        <div className="trackTextInfo">
+                          <span>{track.title}</span>
+                          <span>{track.author_login}</span>
+                        </div>
+                      </div>
+                      <div className="trackAlbumInfo">
+                        <span> AlbumTitle </span>
+                      </div>
+                      <div className="trackDurationInfo">
+                        <span>
+                          {formatDuration(track.duration)}
+                        </span>
                       </div>
                     </div>
-                    <div className="trackAlbumInfo">
-                      <span> AlbumTitle </span>
-                    </div>
-                    <div className="trackDurationInfo">
-                      <span>
-                        {formatDuration(track.duration)}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })
-            } 
+                  )
+                })
+              } 
+            </div>
           </div>
         </div>
     </>

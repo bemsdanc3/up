@@ -1,4 +1,9 @@
 import { useState } from 'react'
+import HomeIcon from './assets/HomeIcon.svg?react';
+import SearchIcon from './assets/SearchIcon.svg?react';
+import ProfileIcon from './assets/ProfileIcon.svg?react';
+import UsersIcon from './assets/UsersIcon.svg?react';
+import TrackListIcon from './assets/TrackListIcon.svg?react';
 
 function Header({ profileFunc, homeFunc }) {
   
@@ -6,16 +11,33 @@ function Header({ profileFunc, homeFunc }) {
     <>
       <header>
         <div id="headerLeft">
-            <button onClick={()=>{homeFunc()}}>Home</button>
+            <button onClick={()=>{homeFunc()}}>
+              <HomeIcon />
+              Home
+            </button>
+            <button onClick={()=>{console.log('Тут будет страница пользователей для админа')}}>
+              <UsersIcon />
+              Users
+            </button>
+            <button onClick={()=>{console.log('Тут будет страница треков для админа')}}>
+              <TrackListIcon />
+              Tracks
+            </button>
         </div>
         <div id="headerCenter">
             <div id="searchDiv">
                 <input type="text" />
-                <button>Search</button>
+                <button>
+                  <SearchIcon />
+                  Search
+                </button>
             </div>
         </div>
         <div id="headerRight">
-            <button onClick={()=>{profileFunc()}}>Profile</button>
+            <button onClick={()=>{profileFunc()}}>
+              <ProfileIcon />
+              Profile
+            </button>
         </div>
       </header>
     </>
