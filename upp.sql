@@ -25,7 +25,7 @@ create table albums (
 create table tracks (
                         ID serial primary key,
                         duration int,
-                        tite text,
+                        title text,
                         album_id int references albums(id) on delete cascade,
                         genre_id int references genre(id) on delete cascade,
                         tracklink varchar(255),
