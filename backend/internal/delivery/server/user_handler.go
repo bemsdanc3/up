@@ -13,7 +13,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+	"unicode"
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
@@ -87,6 +89,42 @@ func getIDFromRouter(r *http.Request) (int, error) {
 	return id, nil
 }
 
+func ValidatePassword(password string) error {
+	// Проверяем длину пароля
+	if len(password) < 4 || len(password) > 16 {
+		return errors.New("password must be between 4 and 16 characters")
+	}
+
+	// Проверяем наличие запрещенных символов
+	forbiddenSymbols := "*&{}|+"
+	for _, char := range password {
+		if strings.ContainsRune(forbiddenSymbols, char) {
+			return errors.New("password contains forbidden symbols")
+		}
+	}
+
+	// Проверяем наличие заглавных букв и цифр
+	var hasUpper, hasDigit bool
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			hasUpper = true
+		}
+		if unicode.IsDigit(char) {
+			hasDigit = true
+		}
+	}
+
+	if !hasUpper {
+		return errors.New("password must contain at least one uppercase letter")
+	}
+
+	if !hasDigit {
+		return errors.New("password must contain at least one digit")
+	}
+
+	return nil
+}
+
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "wrong method", http.StatusMethodNotAllowed)
@@ -96,6 +134,11 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var newUser entities.User
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	if err := ValidatePassword(newUser.Pass); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
