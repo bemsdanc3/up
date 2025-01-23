@@ -224,3 +224,27 @@ func (h *PlaylistHandler) AddTrackToPlaylist(w http.ResponseWriter, r *http.Requ
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "track added to playlist"})
 }
+
+func (h *PlaylistHandler) GetAllPlaylistsByAuthorID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authorID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	playlists, err := h.useCase.GetAllPlaylistsByAuthorID(authorID)
+	if err != nil {
+		log.Printf("Cant get playlists by author id: %v", err)
+		http.Error(w, "error fetching playlists by author id", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlists)
+}
