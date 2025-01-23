@@ -207,3 +207,51 @@ func (h *TrackHandler) GetRandomTrack(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(track)
 }
+
+func (h *TrackHandler) GetTrackByAuthorID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authorID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	tracks, err := h.usecase.GetTrackByAuthorID(authorID)
+	if err != nil {
+		log.Printf("Cant get tracks by author id: %v", err)
+		http.Error(w, "error fetching tracks by author id", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
+
+func (h *TrackHandler) GetTrackByGenreID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	genreID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	track, err := h.usecase.GetRandomTrackByGenre(genreID)
+	if err != nil {
+		http.Error(w, "Error fetching random track", http.StatusInternalServerError)
+		log.Printf("Error in handler: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(track)
+}
