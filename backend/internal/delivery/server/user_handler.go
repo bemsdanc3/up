@@ -30,12 +30,26 @@ func NewUserHandler(usecase usecase.UserUseCase, playlistUsecase usecase.Playlis
 	}
 }
 
-func generateJWT(user entities.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+func generateTokens(user entities.User) (accessToken, refreshToken string, err error) {
+	// Генерация access-токена (жизнь короткая, например, 1 час)
+	accessClaims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 1).Unix(),
-	})
-	return token.SignedString(jwtSecret)
+		"exp":     time.Now().Add(time.Hour).Unix(), // 1 час
+	}
+	accessJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessToken, err = accessJWT.SignedString(jwtSecret)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Генерация refresh-токена (жизнь долгая, например, 7 дней)
+	refreshClaims := jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), // 7 дней
+	}
+	refreshJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshToken, err = refreshJWT.SignedString(jwtSecret)
+	return
 }
 
 func getUserIDFromCookie(r *http.Request) (int, error) {
@@ -107,7 +121,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error creating favorite playlist: %v", err)
 	}
 
-	token, err := generateJWT(newUser)
+	token, refreshToken, err := generateTokens(newUser)
 	if err != nil {
 		log.Printf("Error generating token: %v", err)
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
@@ -118,6 +132,15 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Path:     "/",
+	})
+	http.SetCookie(w, &http.Cookie{ // токен в куки
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
@@ -165,7 +188,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := generateJWT(*user)
+	token, refreshToken, err := generateTokens(*user)
 	if err != nil {
 		log.Printf("Error generating token: %v", err)
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
@@ -176,6 +199,16 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Path:     "/",
+	})
+
+	http.SetCookie(w, &http.Cookie{ // токен в куки
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
@@ -277,4 +310,64 @@ func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 
+}
+
+func (h *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		http.Error(w, "No refresh token provided", http.StatusUnauthorized)
+		return
+	}
+
+	tokenString := cookie.Value
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return jwtSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		http.Error(w, "Invalid or expired refresh token", http.StatusUnauthorized)
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || claims["user_id"] == nil {
+		http.Error(w, "Invalid refresh token claims", http.StatusUnauthorized)
+		return
+	}
+
+	userID := int(claims["user_id"].(float64))
+
+	user := entities.User{ID: userID}
+	accessToken, refreshToken, err := generateTokens(user)
+	if err != nil {
+		http.Error(w, "Error generating tokens", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    accessToken,
+		Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Path:     "/",
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Path:     "/",
+	})
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Tokens refreshed successfully"})
 }
