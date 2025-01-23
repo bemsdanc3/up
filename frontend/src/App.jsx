@@ -7,37 +7,49 @@ import Player from './Player.jsx'
 
 function App() {
   const [logged, setLogged] = useState(false);
-  const [track, setTrack] = useState({});
-  const [isProfile, setIsProfile] = useState(false);
+  const [track, setTrack] = useState(null);
+  const [isWavePlaying, setIsWavePlaying] = useState(false); // состояние волны
+  const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
+  const [userProfile, setUserProfile] = useState('');
 
-  const handleProfile = () => {
-    console.log("Profile function called");
-    setIsProfile(true);
+  const handleProfile = (userid) => {
+    setUserProfile(userid);
   };
 
   const handleHome = () => {
-    console.log("Home function called");
-    setIsProfile(false);
+    setUserProfile('');
   };
+
+  const playWave = () => {
+    setIsWavePlaying(!isWavePlaying); // Переключаем состояние волны
+    setTrack(null); // Сбрасываем текущий трек
+  };
+  
+  const playTrack = (newTrack) => {
+    setIsWavePlaying(false); // Останавливаем волну
+    setTrack(newTrack); // Устанавливаем текущий трек
+  };   
 
   return (
     <>
-      {!logged &&
-        <LoginForm logFunc={()=>{setLogged(true)}}/>
-      }
-      {logged && 
-        <Header profileFunc={handleProfile} homeFunc={handleHome} />
-      }
-      {logged && isProfile &&
-        <Profile />
-      }
-      {logged && !isProfile &&
-        <Home trackPlay={(track)=>{setTrack(track)}}/>
-      }
-      {logged &&
-      <Player track={track}/>}
+      {!logged && <LoginForm logFunc={() => setLogged(true)} />}
+      {logged && <Header profileFunc={() => handleProfile('self')} homeFunc={handleHome} />}
+      {logged && userProfile && <Profile userId={userProfile} />}
+      {logged && !userProfile && (
+        <Home 
+          trackPlay={playTrack} 
+          playWave={playWave} 
+        />
+      )}
+      {logged && (
+        <Player 
+          track={track} 
+          isWavePlaying={isWavePlaying} 
+          userProfile={handleProfile} 
+        />
+      )}
     </>
-  )
+  );
 }
 
 export default App
