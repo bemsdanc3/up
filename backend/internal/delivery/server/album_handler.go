@@ -48,7 +48,7 @@ func (h *AlbumHandler) CreateAlbum(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Генерация URL для обложки
-	coverLink := "localhost:8080/uploads/covers-albums/" + filepath.Base(coverPath)
+	coverLink := "http://localhost:8080/uploads/covers-albums/" + filepath.Base(coverPath)
 
 	// Чтение остальных данных альбома из формы
 	var newAlbum entities.Album

@@ -12,6 +12,8 @@ type PlaylistUseCase interface {
 	EditPlaylistByID(playlist *entities.Playlist, playlistID int) error
 	GetAllPlaylistsByUserID(userID int) ([]entities.Playlist, error)
 	AddTrackToPlaylist(playlistID, trackID int) error
+	GetFavoritePlaylist(userID int) (*entities.Playlist, error)
+	AddTrackToFavorite(playlistID, trackID int) error
 }
 
 type playlistUseCase struct {
@@ -44,4 +46,12 @@ func (u *playlistUseCase) GetAllPlaylistsByUserID(userID int) ([]entities.Playli
 
 func (u *playlistUseCase) AddTrackToPlaylist(playlistID, trackID int) error {
 	return u.repo.AddTrackToPlaylist(playlistID, trackID)
+}
+
+func (u *playlistUseCase) GetFavoritePlaylist(userID int) (*entities.Playlist, error) {
+	return u.repo.GetFavoritePlaylist(userID)
+}
+
+func (u *playlistUseCase) AddTrackToFavorite(playlistID, trackID int) error {
+	return u.repo.AddTrackToFavorite(playlistID, trackID)
 }

@@ -7,6 +7,7 @@ import Player from './Player.jsx'
 
 function App() {
   const [logged, setLogged] = useState(false);
+  const [track, setTrack] = useState({});
   const [isProfile, setIsProfile] = useState(false);
 
   const handleProfile = () => {
@@ -31,10 +32,10 @@ function App() {
         <Profile />
       }
       {logged && !isProfile &&
-        <Home />
+        <Home trackPlay={(track)=>{setTrack(track)}}/>
       }
       {logged &&
-      <Player/>}
+      <Player track={track}/>}
     </>
   )
 }
