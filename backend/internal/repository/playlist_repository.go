@@ -17,6 +17,7 @@ type PlaylistRepository interface {
 	AddTrackToPlaylist(playlistID, trackID int) error
 	GetFavoritePlaylist(userID int) (*entities.Playlist, error)
 	AddTrackToFavorite(playlistID, trackID int) error
+	GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error)
 }
 
 type playlistRepository struct {
@@ -181,4 +182,30 @@ func (r *playlistRepository) AddTrackToFavorite(playlistID, trackID int) error {
 		return err
 	}
 	return err
+}
+
+func (r *playlistRepository) GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error) {
+	query := `SELECT id, cover, title FROM playlists WHERE author_id = $1`
+
+	rows, err := r.db.Query(query, authorID)
+	if err != nil {
+		log.Printf("error getting playlists by author ID on database lvl: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var playlists []entities.Playlist
+	for rows.Next() {
+		var playlist entities.Playlist
+		if err = rows.Scan(
+			&playlist.ID,
+			&playlist.Cover,
+			&playlist.Title,
+		); err != nil {
+			log.Printf("error scanning playlist rows: %v", err)
+			return nil, err
+		}
+		playlists = append(playlists, playlist)
+	}
+	return playlists, err
 }

@@ -10,4 +10,5 @@ type Album struct {
 	AuthorID        int        `json:"author_id,omitempty"`
 	Label           string     `json:"label,omitempty"`
 	PublicationDate *time.Time `json:"publication_date,omitempty"`
+	AuthorLogin     string     `json:"authorLogin,omitempty"`
 }
