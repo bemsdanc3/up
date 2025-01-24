@@ -104,7 +104,7 @@ func (r *trackRepository) GetAllTracks() ([]entities.Track, error) {
 	query := `
 		SELECT 
 			t.id, t.duration, t.title, t.album_id, t.genre_id, t.tracklink, t.listen_count, 
-			a.cover, a.author_id, u.login
+			a.cover, a.author_id, a.title, u.login
 		FROM 
 			tracks t
 		LEFT JOIN 
@@ -133,6 +133,7 @@ func (r *trackRepository) GetAllTracks() ([]entities.Track, error) {
 			&track.ListenCount,
 			&track.Cover,
 			&track.AuthorID,
+			&track.AlbumTitle,
 			&track.AuthorLogin,
 		)
 		if err != nil {

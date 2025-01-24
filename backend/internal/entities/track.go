@@ -11,4 +11,5 @@ type Track struct {
 	Cover       string `json:"cover,omitempty"`
 	AuthorID    int    `json:"author_id,omitempty"`
 	AuthorLogin string `json:"author_login,omitempty"`
+	AlbumTitle  string `json:"album_title,omitempty"`
 }
