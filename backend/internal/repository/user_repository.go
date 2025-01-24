@@ -16,6 +16,7 @@ type UserRepository interface {
 	GetSubscriptionsByUserID(userID int) ([]int, error)
 	UpdateUserProfile(user *entities.User, userID int) error
 	GetUserProfile(userID int) (*entities.User, error)
+	//все пользователи, изменение роли пользователя
 }
 
 type userRepository struct {
