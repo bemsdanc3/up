@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function Profile({ userId }) {
+function Profile({ userId, myData, handleTrackClick }) {
     const [userData, setUserData] = useState({})
     const [tracks, setTracks] = useState([])
     const [albums, setAlbums] = useState([])
@@ -11,12 +11,7 @@ function Profile({ userId }) {
 
     const loadProfileInfo = async () => {
         try {
-            let userLink;
-            if (userId == 'self') {
-                userLink = 'user/my/profile'
-            } else {
-                userLink = `users/profile/${userId}`
-            }
+            let userLink = `users/profile/${userId}`;
             const userProfileRes = await fetch(`http://localhost:8080/${userLink}`,{
                 method: 'GET',
                 credentials: 'include',
@@ -110,18 +105,21 @@ function Profile({ userId }) {
                     <div id="userInfo">
                         <img src={userData.pfp || pfp} alt="img" />
                         <div id="userTextInfo">
+                            <h2>{userData.role}</h2>
                             <h1>{userData.login}</h1>
-                            {userData.email &&<h2>{userData.email}</h2>}
+                            {(myData.role == 'admin' || myData.user_id == userData.id) &&
+                                <h2>{userData.email}</h2>
+                            }
                         </div>
                     </div>
                     {tracks && tracks.length >=1 &&
                     <>
-                        <h2>User tracks:</h2>
+                        <h2>Треки пользователя:</h2>
                         <div id="userTracks">
                                 {tracks.map((track) => {
                                     return (
                                         <>
-                                        <div className="track" >
+                                        <div className="track" onClick={()=>{handleTrackClick(track)}}>
                                             <div className="trackLeftInfo">
                                                 <img src={track.cover} alt="" />
                                                 <div className="trackTextInfo">
@@ -142,7 +140,7 @@ function Profile({ userId }) {
                     }
                     {albums && albums.length >= 1 &&
                     <>
-                        <h2>User albums:</h2>
+                        <h2>Альбомы пользователя:</h2>
                         <div id="userAlbums">
                                 {albums.map((album)=>{
                                     return (
@@ -157,7 +155,7 @@ function Profile({ userId }) {
                     }
                     {playlists && playlists.length >= 1 &&
                     <>
-                        <h2>User playlists:</h2>
+                        <h2>Плейлисты пользователя:</h2>
                         <div id="userPlaylists">
                                 {playlists.map((playlist)=>{
                                     return (

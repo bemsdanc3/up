@@ -13,34 +13,34 @@ function Header({ profileFunc, homeFunc, loginData, usersFunc, tracksFunc }) {
         <div id="headerLeft">
             <button onClick={()=>{homeFunc()}}>
               <HomeIcon />
-              Home
+              Главная
             </button>
             {loginData.role == 'admin' &&
             <>
             <button onClick={()=>{usersFunc()}}>
               <UsersIcon />
-              Users
+              Пользователи
             </button>
             <button onClick={()=>{tracksFunc()}}>
               <TrackListIcon />
-              Tracks
+              Треки
             </button>
             </>
             }
         </div>
-        <div id="headerCenter">
+        {/* <div id="headerCenter">
             <div id="searchDiv">
                 <input type="text" />
                 <button>
                   <SearchIcon />
-                  Search
+                  Поиск
                 </button>
             </div>
-        </div>
+        </div> */}
         <div id="headerRight">
             <button onClick={()=>{profileFunc()}}>
               <ProfileIcon />
-              Profile
+              Профиль
             </button>
         </div>
       </header>

@@ -63,9 +63,7 @@ function LoginForm({ logFunc, loginData }) {
       } catch (error) {
         console.log(error);
       }
-    }
-
-    
+    }    
 
   return (
     <> 

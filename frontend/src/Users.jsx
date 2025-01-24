@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function Users({ userProfile }) {
+function Users({ userProfile, userData }) {
   const [users, setUsers] = useState([]);
 
   const getAllUsers = async () => {
@@ -23,7 +23,37 @@ function Users({ userProfile }) {
 
   useEffect(()=>{
     getAllUsers();
+    console.log(userData)
   }, [])
+
+  const updUserRole = async (role, id) => {
+    try {
+      const updUserRoleRes = await fetch(`http://localhost:8080/users/update-role`,{
+        method: 'PATCH',
+        credentials: 'include',
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({
+          role: role,
+          user_id: id
+        }),
+      });
+      const responseData = await updUserRoleRes.json();
+      console.log("responseData");
+      console.log(responseData);
+      if (updUserRoleRes.ok) {
+        console.log("salamalekum")
+        getAllUsers();
+      } else {
+        const errorData = await updUserRoleRes.json();
+        console.log(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <> 
@@ -44,26 +74,27 @@ function Users({ userProfile }) {
                                     <span>{user.email}</span>
                                 </div>
                             </div>
+                            {userData.user_id != user.id &&
                             <div className="userAdminBtns">
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('admin', user.id)}}
                                     className={user.role == 'admin' ? 'selected' : ''}
                                 >
                                     Admin
                                 </button>
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('artist', user.id)}}
                                     className={user.role == 'artist' ? 'selected' : ''}
                                 >
                                     Artist
                                 </button>
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('user', user.id)}}
                                     className={user.role == 'user' ? 'selected' : ''}
                                 >
                                     User
                                 </button>
-                            </div>
+                            </div>}
                         </div>
                     )
                 })

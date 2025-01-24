@@ -192,7 +192,7 @@ function Player({ track, userProfile, isWavePlaying }) {
         <div id="playercontrols">
           <button onClick={togglePlay}>
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
-            {isPlaying ? 'Pause' : 'Play'}
+            {isPlaying ? 'Пауза' : 'Играть'}
           </button>
           <button
             id="nextBtn"
@@ -201,7 +201,7 @@ function Player({ track, userProfile, isWavePlaying }) {
             }}
           >
             <NextIcon />
-            Next
+            Далее
           </button>
         </div>
         <div
@@ -231,7 +231,7 @@ function Player({ track, userProfile, isWavePlaying }) {
         />
         <button onClick={toggleMute}>
           {isMuted ? <VolumeOffIcon/> : <VolumeIcon/>}
-          {isMuted ? 'Unmute' : 'Mute'}
+          {isMuted ? 'Звук выкл.' : 'Звук'}
         </button>
       </div>
     </div>

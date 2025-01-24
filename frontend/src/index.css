@@ -209,14 +209,14 @@ header #headerRight {
 .track {
   display: flex;
   margin: 5px 0;
-  background-color: var(--inputs-color);
+  background-color: var(--panels-color);
   align-items: center;
   justify-content: space-between;
   padding: 5px;
   border-radius: 5px;
   &:hover {
     cursor: pointer;
-    background-color: var(--inputs-hover-color);
+    background-color: var(--panels-hover-color);
   }
 }
 
@@ -400,4 +400,12 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 0px 15px;
+}
+
+#tracksPage {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 170px);
+  overflow-y: scroll;
 }
