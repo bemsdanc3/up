@@ -14,6 +14,7 @@ type TrackRepository interface {
 	GetAllTracks() ([]entities.Track, error)
 	GetTrackCount() (int, error)
 	GetRandomTrack(offset int) (*entities.Track, error)
+	//трек по айдишнику плейлиста и альбома
 }
 
 type trackRepository struct {
