@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function Profile({ userId, myData, handleTrackClick }) {
+function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) {
     const [userData, setUserData] = useState({})
     const [tracks, setTracks] = useState([])
     const [albums, setAlbums] = useState([])
@@ -103,7 +103,7 @@ function Profile({ userId, myData, handleTrackClick }) {
                 {userData && userDataLoaded &&
                 <>
                     <div id="userInfo">
-                        <img src={userData.pfp || pfp} alt="img" />
+                        <img src={userData.pfp } alt="img" />
                         <div id="userTextInfo">
                             <h2>{userData.role}</h2>
                             <h1>{userData.login}</h1>
@@ -144,7 +144,7 @@ function Profile({ userId, myData, handleTrackClick }) {
                         <div id="userAlbums">
                                 {albums.map((album)=>{
                                     return (
-                                        <div className="album">
+                                        <div className="album" onClick={()=>albumFunc(album.id)}>
                                             <img src={album.cover} alt="" />
                                             <span>{album.title}</span>
                                         </div>
@@ -159,7 +159,7 @@ function Profile({ userId, myData, handleTrackClick }) {
                         <div id="userPlaylists">
                                 {playlists.map((playlist)=>{
                                     return (
-                                        <div className="playlist">
+                                        <div className="playlist" onClick={()=>playlistFunc(playlist.id)}>
                                             <img src={playlist.cover} alt="" />
                                             <span>{playlist.title}</span>
                                         </div>

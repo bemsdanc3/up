@@ -137,9 +137,27 @@ header #headerRight {
   display: flex;
 }
 
-#homeRight {
+#homeRight, #selectedGroup {
   flex-grow: 1;
   overflow-y: scroll;
+}
+
+#selectedGroupInfo {
+  display: flex;
+  padding: 15px;
+}
+
+#selectedGroupInfo img {
+  max-width: 240px;
+  min-width: 240px;
+  max-height: 240px;
+  min-height: 240px;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+#selectedTracksGroup {
+  padding: 15px;
 }
 
 #myWave {
@@ -248,8 +266,10 @@ header #headerRight {
 }
 
 .track img {
-  width: 40px;
-  height: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  min-height: 40px;
+  max-height: 40px;
 }
 
 button {
@@ -292,6 +312,10 @@ button:hover {
   display: flex;
 }
 
+#createBtns button {
+  flex-grow: 1;
+}
+
 #profilePage {
   display: flex;
   flex-direction: column;
@@ -307,6 +331,11 @@ button:hover {
 
 #userInfo img {
   border-radius: 10px;
+  min-width: 240px;
+  max-width: 240px;
+  min-height: 240px;
+  max-height: 240px;
+  background-color: aquamarine;
 }
 
 #userInfo #userTextInfo {

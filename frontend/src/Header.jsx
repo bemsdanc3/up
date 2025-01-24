@@ -15,7 +15,7 @@ function Header({ profileFunc, homeFunc, loginData, usersFunc, tracksFunc }) {
               <HomeIcon />
               Главная
             </button>
-            {loginData.role == 'admin' &&
+            {loginData.role === 'admin' &&
             <>
             <button onClick={()=>{usersFunc()}}>
               <UsersIcon />

@@ -40,7 +40,7 @@ func (r *playlistRepository) CreatePlaylist(playlist *entities.Playlist) error {
 func (r *playlistRepository) GetPlaylistByID(playlistID int) (entities.Playlist, error) {
 	var playlist entities.Playlist
 
-	queryPlaylist := `SELECT id, title, creation_date, author_id, cover, description, ispublic FROM playlists WHERE id = $1`
+	queryPlaylist := `SELECT p.id, p.title, p.creation_date, p.author_id, p.cover, p.description, p.ispublic, u.login FROM playlists p JOIN users u ON p.author_id = u.id WHERE p.id = $1`
 
 	err := r.db.QueryRow(queryPlaylist, playlistID).Scan(
 		&playlist.ID,
@@ -50,6 +50,7 @@ func (r *playlistRepository) GetPlaylistByID(playlistID int) (entities.Playlist,
 		&playlist.Cover,
 		&playlist.Description,
 		&playlist.IsPublic,
+		&playlist.AuthorLogin,
 	)
 	if err != nil {
 		log.Printf("error querying playlist: %v", err)
