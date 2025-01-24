@@ -127,3 +127,50 @@ func (h *AlbumHandler) EditAlbumByID(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(map[string]string{"message": "album updated successfully"})
 }
+
+func (h *AlbumHandler) GetAlbumByAuthorID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authorID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	albums, err := h.usecase.GetAlbumsByAuthorID(authorID)
+	if err != nil {
+		log.Printf("Cant get albums by author id: %v", err)
+		http.Error(w, "error fetching albums by author id", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(albums)
+}
+
+func (h *AlbumHandler) GetAlbumByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	albumID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	album, err := h.usecase.GetAlbumByID(albumID)
+	if err != nil {
+		log.Printf("error getting album by id: %v", err)
+		http.Error(w, "error getting album by id", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(album)
+}

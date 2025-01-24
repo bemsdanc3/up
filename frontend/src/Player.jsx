@@ -1,12 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import './player.css';
+import PlayIcon from './assets/PlayIcon.svg?react';
+import NextIcon from './assets/NextIcon.svg?react';
+import PauseIcon from './assets/PauseIcon.svg?react';
+import VolumeIcon from './assets/VolumeIcon.svg?react';
+import VolumeOffIcon from './assets/VolumeOffIcon.svg?react';
 
-function Player({ track }) {
+function Player({ track, userProfile, isWavePlaying }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [trackLoaded, setTrackLoaded] = useState(false);
   const [volume, setVolume] = useState(1); // volume from 0 to 1
   const [isMuted, setIsMuted] = useState(false);
   const [playingTrackInfo, setPlayingTrackInfo] = useState({});
@@ -75,15 +81,21 @@ function Player({ track }) {
       audioRef.current.src = playingTrackInfo.track_link;
       audioRef.current.load(); // Загрузка трека
       audioRef.current.play();
+      setIsPlaying(true);
     }
   }, [playingTrackInfo]);
 
-  useEffect(()=>{
+  
+
+  useEffect(() => {
     if (track) {
-      setPlayingTrackInfo(track)
-      console.log('now playing ' + track.title)
+      setPlayingTrackInfo(track);
     }
-  }, [track])
+  }, [track]);
+
+  useEffect(()=>{
+    getRandomTrack();
+  }, [isWavePlaying])
 
   // Функция для изменения громкости
   const handleVolumeChange = (event) => {
@@ -114,6 +126,7 @@ function Player({ track }) {
       console.log(responseData);
       setIsPlaying(true);
       setPlayingTrackInfo(responseData);
+      setTrackLoaded(true);
     } else {
       console.log('жопа');
     }
@@ -129,19 +142,44 @@ function Player({ track }) {
     return () => {
       audio.removeEventListener('error', handleError);
     };
-  }, []);  
+  }, []); 
+  
+  useEffect(() => {
+    const audio = audioRef.current;
+  
+    const handleTrackEnd = () => {
+      console.log("Трек завершён, запускаем новый трек...");
+      getRandomTrack(); // Запуск нового трека
+    };
+  
+    const handleError = () => {
+      console.error('Ошибка загрузки трека:', audio?.error);
+    };
+  
+    if (audio) {
+      audio.addEventListener('ended', handleTrackEnd);
+      audio.addEventListener('error', handleError);
+    }
+  
+    return () => {
+      if (audio) {
+        audio.removeEventListener('ended', handleTrackEnd);
+        audio.removeEventListener('error', handleError);
+      }
+    };
+  }, [getRandomTrack]);  
 
   return (
     <div id="player">
       <div id="trackinfo">
-        {playingTrackInfo &&
-        <>
-        <img src={playingTrackInfo.cover} alt="" />
-        <div id="trackTextInfo">
-          <span id="tracktitle">{playingTrackInfo.title}</span>
-          <span id="trackauthor">{playingTrackInfo.author_login}</span>
-        </div>
-        </>
+        {trackLoaded && playingTrackInfo &&
+          <>
+            <img src={playingTrackInfo.cover} alt="" />
+            <div id="trackTextInfo">
+              <span id="tracktitle">{playingTrackInfo.title}</span>
+              <span id="trackauthor" onClick={()=>{userProfile(playingTrackInfo.author_id)}}>{playingTrackInfo.author_login}</span>
+            </div>
+          </>
         }
       </div>
       <div id="audioplayer">
@@ -153,6 +191,7 @@ function Player({ track }) {
         ></audio>}
         <div id="playercontrols">
           <button onClick={togglePlay}>
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
             {isPlaying ? 'Pause' : 'Play'}
           </button>
           <button
@@ -161,6 +200,7 @@ function Player({ track }) {
               getRandomTrack();
             }}
           >
+            <NextIcon />
             Next
           </button>
         </div>
@@ -190,6 +230,7 @@ function Player({ track }) {
           className="volume-slider"
         />
         <button onClick={toggleMute}>
+          {isMuted ? <VolumeOffIcon/> : <VolumeIcon/>}
           {isMuted ? 'Unmute' : 'Mute'}
         </button>
       </div>

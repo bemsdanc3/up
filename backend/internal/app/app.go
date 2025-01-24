@@ -47,14 +47,18 @@ func Run() {
 	authRouter.HandleFunc("/user/my/profile", userHandler.GetUserDetailsByID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/user/my/profile/edit", userHandler.UpdateUserProfile).Methods(http.MethodPatch)
 	authRouter.HandleFunc("/users/profile/{id}", userHandler.GetUserProfile).Methods(http.MethodGet)
+	authRouter.HandleFunc("/refresh-token", userHandler.RefreshToken).Methods(http.MethodPost)
+	authRouter.HandleFunc("/logout", userHandler.Logout).Methods(http.MethodPost)
 
 	//запросы с плейлистами
+
 	authRouter.HandleFunc("/playlists/create", playlistHandler.CreatePlaylist).Methods(http.MethodPost)
 	authRouter.HandleFunc("/playlists/view/{id}", playlistHandler.GetPlaylistByID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/playlists/delete", playlistHandler.DeletePlaylistByID).Methods(http.MethodDelete)
 	authRouter.HandleFunc("/playlists/update/{id}", playlistHandler.EditPlaylistByID).Methods(http.MethodPatch)
-	authRouter.HandleFunc("/playlists/all", playlistHandler.GetAllPlaylistsByUserID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/playlists/my/all", playlistHandler.GetAllPlaylistsByUserID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/playlists/add/track", playlistHandler.AddTrackToPlaylist).Methods(http.MethodPost)
+	authRouter.HandleFunc("/playlists/all/{id}", playlistHandler.GetAllPlaylistsByAuthorID).Methods(http.MethodGet)
 
 	//запросы с треками
 	authRouter.HandleFunc("/tracks/create", trackHandler.CreateTrack).Methods(http.MethodPost)
@@ -63,11 +67,15 @@ func Run() {
 	authRouter.HandleFunc("/tracks/all", trackHandler.GetAllTracks).Methods(http.MethodGet)
 	authRouter.HandleFunc("/tracks/like", trackHandler.LikeTrack).Methods(http.MethodPost)
 	authRouter.HandleFunc("/tracks/random", trackHandler.GetRandomTrack).Methods(http.MethodGet)
+	authRouter.HandleFunc("/tracks/all/{id}", trackHandler.GetTrackByAuthorID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/tracks/random-genre/{id}", trackHandler.GetTrackByGenreID).Methods(http.MethodGet)
 
 	//запросы с альбомами
 	authRouter.HandleFunc("/album/create", albumHandler.CreateAlbum).Methods(http.MethodPost)
 	authRouter.HandleFunc("/album/delete/{id}", albumHandler.DeleteAlbumByID).Methods(http.MethodDelete)
 	authRouter.HandleFunc("/album/update/{id}", albumHandler.EditAlbumByID).Methods(http.MethodPatch)
+	authRouter.HandleFunc("/album/all/{id}", albumHandler.GetAlbumByAuthorID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/album/{id}", albumHandler.GetAlbumByID).Methods(http.MethodGet)
 	//статическая папка для треков
 	setupStaticFileServer(r)
 

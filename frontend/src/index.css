@@ -1,7 +1,12 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
   margin: 0;
+  font-family: "Raleway", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
 }
 
 body {
@@ -22,12 +27,19 @@ body {
   justify-content: center;
   /* align-items: center; */
   /* justify-content: center; */
+  --bg-color: rgb(23, 36, 34);
+  --panels-color: rgb(29, 53, 49);
+  --inputs-color: rgb(38, 80, 73);
+  --inputs-hover-color: rgb(43, 95, 86);
+  --text-color: rgb(211, 252, 241);
+  color: var(--text-color);
+  background-color: var(--bg-color);
 }
 
 #registration {
   position: relative;
   /* top: 30%; */
-  background-color: red;
+  background-color: var(--panels-color);
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -37,6 +49,11 @@ body {
   margin: auto;
 }
 
+#registration input, #registration button {
+  background-color: var(--inputs-color);
+  color: var(--text-color);
+}
+
 #registration * {
   /* font-family: "Bungee", serif; */
   margin: 5px;
@@ -44,7 +61,13 @@ body {
   border: none;
   outline: none;
   border-radius: 10px;
-  background-color: green;
+  display: flex;
+  justify-content: center;
+}
+
+
+#registration h1 {
+  justify-content: left;
 }
 
 #registration h1 {
@@ -58,10 +81,52 @@ header {
   display: flex;
   height: 50px;
   justify-content: space-between;
-  max-width: 100%;
+  max-width: calc(100% - 20px);
   width: 100%;
   padding: 10px;
-  background-color: aquamarine;
+  align-items: center;
+  background-color: var(--panels-color);
+}
+
+header #headerLeft, header #headerCenter, header #headerRight {
+  width: 30%;
+  display: flex;
+}
+
+header #headerCenter {
+  justify-content: center;
+  width: 39%;
+}
+
+header #searchDiv {
+  background-color: var(--inputs-color);
+  width: 90%;
+  display: flex;
+  border-radius: 30px;
+}
+
+header #searchDiv input {
+  flex-grow: 1;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  color: var(--text-color);
+}
+
+header #searchDiv button {
+  margin: 0;
+  background-color: transparent;
+  color: black;
+  border-radius: 0 30px 30px 0; 
+  color: var(--text-color);
+  &:hover {
+    background-color: var(--inputs-hover-color);
+  }
+}
+
+header #headerRight {
+  justify-content: right;
 }
 
 #homePage {
@@ -71,28 +136,62 @@ header {
   display: flex;
 }
 
-#myPlaylists {
+#homeRight {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+#myWave {
+  min-height: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url('./assets/8636ce0b8e1fa0498706e0aeff131db9.gif');
+  /* background: url('./assets/3BBS.gif'); */
+  background-size: cover;
+  background-position: center;
+}
+
+#homeGenres {
+  display: flex;
+}
+
+#wavePlayBtn {
+  width: 100px;
+  height: 50px;
+  /* border-radius: 40px; */
+  justify-content: space-evenly;
+}
+
+#myMedia {
   min-width: 250px;
   padding: 10px;
   padding-right: 5px;
   overflow-y: scroll;
 }
 
-.playlist {
+#myPlaylists {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlist, .album {
   display: flex;
   margin: 5px 0;
-  background-color: aqua;
+  background-color: var(--inputs-color);
   width: 95%;
   padding: 3px;
   border-radius: 5px;
   &:hover {
-    background-color: aquamarine;
+    background-color: var(--inputs-hover-color);
     cursor: pointer;
   }
 }
 
-.playlist img {
+.playlist img, .album img {
   width: 50px;
+  height: 50px;
 }
 
 .playlistTextInfo {
@@ -109,28 +208,141 @@ header {
 .track {
   display: flex;
   margin: 5px 0;
-  background-color: aquamarine;
+  background-color: var(--inputs-color);
   align-items: center;
   justify-content: space-between;
   padding: 5px;
   border-radius: 5px;
   &:hover {
     cursor: pointer;
-    background-color: aqua;
+    background-color: var(--inputs-hover-color);
   }
 }
 
 .track .trackLeftInfo {
   display: flex;
+  width: 33%;
 }
 
 .track .trackTextInfo {
   display: flex;
   flex-direction: column;
   margin: 0 5px;
+  flex-grow: 1;
+}
+
+.track .trackAlbumInfo {
+  width: 33%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.track .trackDurationInfo {
+  width: 33%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  padding: 10px;
 }
 
 .track img {
   width: 40px;
   height: 40px;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 5px;
+  background-color: var(--inputs-color);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:hover {
+  background-color: var(--inputs-hover-color);
+}
+
+#RockGanre {
+  background-color: rgba(0, 0, 139, 0.5);
+}
+#PopGanre {
+  background-color: rgba(255, 192, 203, 0.5);
+}
+#MetalGanre {
+  background-color: rgba(165, 42, 42, 0.5);
+}
+#ClassicalGanre {
+  background-color: rgba(255, 166, 0, 0.5);
+}
+/* #MusicForSexGanre {
+  background-color: rgba(139, 29, 29, 0.5);
+} */
+#HipHopGanre {
+  background-color: rgba(100, 148, 237, 0.5);
+}
+
+#createBtns {
+  display: flex;
+}
+
+#profilePage {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 170px);
+  overflow-y: scroll;
+  padding: 15px;
+}
+
+#userInfo {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+#userInfo img {
+  border-radius: 10px;
+}
+
+#userInfo #userTextInfo {
+  margin: 15px;
+}
+
+#profilePage #userTracks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 0px 15px;
+  /* overflow-x: scroll; */
+}
+
+#profilePage #userTracks .trackTextInfo {
+  justify-content: center;
+}
+
+#profilePage .album, #profilePage .playlist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#profilePage .album img, #profilePage .playlist img {
+  width: 200px;
+  height: 200px;
+  background-color: var(--inputs-color);
+}
+
+#profilePage #userAlbums {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0px 15px;
+}
+
+#profilePage #userPlaylists {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0px 15px;
 }
