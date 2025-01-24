@@ -26,6 +26,36 @@ function Users({ userProfile, userData }) {
     console.log(userData)
   }, [])
 
+  const Login = async () => {
+    try {
+      const loginRes = await fetch(`http://localhost:8080/users/update/role`,{
+        method: 'PATCH',
+        credentials: 'include',
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({
+          email: email.value,
+          pass: password.value,
+        }),
+      });
+      const responseData = await loginRes.json();
+      loginData(responseData);
+      console.log("responseData");
+      console.log(responseData);
+      if (loginRes.ok) {
+        console.log("salamalekum")
+        logFunc();
+      } else {
+        const errorData = await loginRes.json();
+        console.log(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <> 
       <div id="usersPage">

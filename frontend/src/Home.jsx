@@ -105,14 +105,14 @@ function Home({ trackPlay, playWave }) {
               <button id="wavePlayBtn" onClick={()=>{handleWavePlay()}}>
                 {/* {!isWavePlaying ? <PlayIcon /> : <PauseIcon />} */}
                 <PlayIcon />
-                Play
+                Играть
               </button>
               <div id="homeGenres">
-                <button id="RockGanre">Rock</button>
-                <button id="PopGanre">Pop</button>
-                <button id="MetalGanre">Metal</button>
-                <button id="ClassicalGanre">Classical</button>
-                <button id="HipHopGanre">Hip-Hop</button>
+                <button id="RockGanre">Рок</button>
+                <button id="PopGanre">Поп</button>
+                <button id="MetalGanre">Метал</button>
+                <button id="ClassicalGanre">Классика</button>
+                <button id="HipHopGanre">Хип-Хоп</button>
                 {/* <button id="MusicForSexGanre">Music for sex</button> */}
               </div>
             </div>

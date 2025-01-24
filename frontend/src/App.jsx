@@ -5,6 +5,7 @@ import Profile from './Profile.jsx'
 import Home from './Home.jsx'
 import Player from './Player.jsx'
 import Users from './Users.jsx'
+import Tracks from './Tracks.jsx'
 
 function App() {
   const [logged, setLogged] = useState(false);
@@ -63,12 +64,17 @@ function App() {
         />
       }
       {logged && userProfile && page == 'Profile' &&
-        <Profile userId={userProfile} userData={loginData}/>
+        <Profile userId={userProfile} myData={loginData} handleTrackClick={playTrack}/>
       }
       {logged && page == 'Users' &&
         <Users 
           userProfile={(id)=>handleProfile(id)}
           userData={loginData}
+        />
+      }
+      {logged && page == 'Tracks' &&
+        <Tracks 
+        handleTrackClick={playTrack}
         />
       }
       {logged && page == 'Home' && 
