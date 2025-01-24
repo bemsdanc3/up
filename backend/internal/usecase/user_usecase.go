@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/internal/entities"
 	"backend/internal/repository"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -15,6 +16,7 @@ type UserUseCase interface {
 	UpdateUserProfile(user *entities.User, userID int) error
 	GetUserProfile(userID int) (*entities.User, error)
 	GetAllUsers() ([]entities.User, error)
+	UpdateUsersRole(userID int, role string) error
 }
 
 type userUseCase struct {
@@ -93,4 +95,12 @@ func (u *userUseCase) GetUserProfile(userID int) (*entities.User, error) {
 
 func (u *userUseCase) GetAllUsers() ([]entities.User, error) {
 	return u.repo.GetAllUsers()
+}
+
+func (u *userUseCase) UpdateUsersRole(userID int, role string) error {
+	validRoles := map[string]bool{"admin": true, "user": true, "artist": true}
+	if !validRoles[role] {
+		return errors.New("invalid role")
+	}
+	return u.repo.UpdateUsersRole(userID, role)
 }
