@@ -108,50 +108,68 @@ function Profile({ userId }) {
                 {userData && userDataLoaded &&
                 <>
                     <div id="userInfo">
-                        <img src={pfp} alt="img" />
+                        <img src={userData.pfp || pfp} alt="img" />
                         <div id="userTextInfo">
                             <h1>{userData.login}</h1>
                             {userData.email &&<h2>{userData.email}</h2>}
                         </div>
                     </div>
-                    <h2>User tracks:</h2>
-                    <div id="userTracks">
-                        {tracks && tracks.length >=1 &&
-                            tracks.map((track) => {
-                                return (
-                                    <>
-                                    <div className="track" >
-                                        <div className="trackLeftInfo">
-                                            <img src={track.cover} alt="" />
-                                            <div className="trackTextInfo">
-                                            <span>{track.title}</span>
+                    {tracks && tracks.length >=1 &&
+                    <>
+                        <h2>User tracks:</h2>
+                        <div id="userTracks">
+                                {tracks.map((track) => {
+                                    return (
+                                        <>
+                                        <div className="track" >
+                                            <div className="trackLeftInfo">
+                                                <img src={track.cover} alt="" />
+                                                <div className="trackTextInfo">
+                                                <span>{track.title}</span>
+                                                </div>
+                                            </div>
+                                            <div className="trackDurationInfo">
+                                                <span>
+                                                {formatDuration(track.duration)}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div className="trackDurationInfo">
-                                            <span>
-                                            {formatDuration(track.duration)}
-                                            </span>
+                                        </>
+                                    )
+                                })}
+                        </div>
+                    </>
+                    }
+                    {albums && albums.length >= 1 &&
+                    <>
+                        <h2>User albums:</h2>
+                        <div id="userAlbums">
+                                {albums.map((album)=>{
+                                    return (
+                                        <div className="album">
+                                            <img src={album.cover} alt="" />
+                                            <span>{album.title}</span>
                                         </div>
-                                    </div>
-                                    </>
-                                )
-                            })
-                        }
-                    </div>
-                    <h2>User albums:</h2>
-                    <div id="userAlbums">
-                        <div className="album">
-                            <img src="" alt="" />
-                            <span>Title</span>
+                                    )
+                                })}
                         </div>
-                    </div>
-                    <h2>User playlists:</h2>
-                    <div id="userPlaylists">
-                        <div className="playlist">
-                            <img src="" alt="" />
-                            <span>Title</span>
+                    </>
+                    }
+                    {playlists && playlists.length >= 1 &&
+                    <>
+                        <h2>User playlists:</h2>
+                        <div id="userPlaylists">
+                                {playlists.map((playlist)=>{
+                                    return (
+                                        <div className="playlist">
+                                            <img src={playlist.cover} alt="" />
+                                            <span>{playlist.title}</span>
+                                        </div>
+                                    )
+                                })}
                         </div>
-                    </div>
+                    </>
+                    }
                 </>
                 }
             </div>

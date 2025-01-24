@@ -5,7 +5,7 @@ import ProfileIcon from './assets/ProfileIcon.svg?react';
 import UsersIcon from './assets/UsersIcon.svg?react';
 import TrackListIcon from './assets/TrackListIcon.svg?react';
 
-function Header({ profileFunc, homeFunc, loginData }) {
+function Header({ profileFunc, homeFunc, loginData, usersFunc, tracksFunc }) {
   
   return (
     <>
@@ -17,11 +17,11 @@ function Header({ profileFunc, homeFunc, loginData }) {
             </button>
             {loginData.role == 'admin' &&
             <>
-            <button onClick={()=>{console.log('Тут будет страница пользователей для админа')}}>
+            <button onClick={()=>{usersFunc()}}>
               <UsersIcon />
               Users
             </button>
-            <button onClick={()=>{console.log('Тут будет страница треков для админа')}}>
+            <button onClick={()=>{tracksFunc()}}>
               <TrackListIcon />
               Tracks
             </button>

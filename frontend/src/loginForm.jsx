@@ -49,7 +49,7 @@ function LoginForm({ logFunc, loginData }) {
             pass: password.value,
           }),
         });
-        const responseData = loginRes.json();
+        const responseData = await loginRes.json();
         loginData(responseData);
         console.log("responseData");
         console.log(responseData);
