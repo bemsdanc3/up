@@ -6,7 +6,7 @@ import PauseIcon from './assets/PauseIcon.svg?react';
 import VolumeIcon from './assets/VolumeIcon.svg?react';
 import VolumeOffIcon from './assets/VolumeOffIcon.svg?react';
 
-function Player({ track, userProfile, isWavePlaying }) {
+function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -89,7 +89,11 @@ function Player({ track, userProfile, isWavePlaying }) {
 
   useEffect(() => {
     if (track) {
-      setPlayingTrackInfo(track);
+      if (groupInfo) {
+        setPlayingTrackInfo({ ...track, author_login: groupInfo.authorLogin, cover: groupInfo.cover });
+      } else {
+        setPlayingTrackInfo(track);
+      }
     }
   }, [track]);
 
@@ -220,17 +224,37 @@ function Player({ track, userProfile, isWavePlaying }) {
         </div>
       </div>
       <div id="playersettings">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
+        <div
           className="volume-slider"
-        />
+          onMouseDown={(e) => {
+            const slider = e.currentTarget;
+            const { left, width } = slider.getBoundingClientRect();
+            const updateVolume = (event) => {
+              const clickPosition = (event.clientX - left) / width;
+              const newVolume = Math.min(Math.max(clickPosition, 0), 1); // Ограничиваем от 0 до 1
+              setVolume(newVolume);
+              audioRef.current.volume = newVolume;
+              if (newVolume > 0) setIsMuted(false);
+            };
+
+            const handleMouseMove = (event) => updateVolume(event);
+            const handleMouseUp = () => {
+              window.removeEventListener('mousemove', handleMouseMove);
+              window.removeEventListener('mouseup', handleMouseUp);
+            };
+
+            updateVolume(e); // Обновляем громкость при первом клике
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+          }}
+        >
+          <div
+            className="volume-progress"
+            style={{ width: `${volume * 100}%` }}
+          ></div>
+        </div>
         <button onClick={toggleMute}>
-          {isMuted ? <VolumeOffIcon/> : <VolumeIcon/>}
+          {isMuted ? <VolumeOffIcon /> : <VolumeIcon />}
           {isMuted ? 'Звук выкл.' : 'Звук'}
         </button>
       </div>

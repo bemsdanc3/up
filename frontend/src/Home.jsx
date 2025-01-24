@@ -3,7 +3,7 @@ import PlusIcon from './assets/PlusIcon.svg?react';
 import PlayIcon from './assets/PlayIcon.svg?react';
 import PauseIcon from './assets/PauseIcon.svg?react';
 
-function Home({ trackPlay, playWave, loginData, playlist, album }) {
+function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
   const [tracks, setTracks] = useState([])
   const [tracksLoaded, setTracksLoaded] = useState(false)
   const [playlists, setPlaylists] = useState([])
@@ -22,9 +22,9 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
       credentials: 'include',
       withCredentials: true,
     })
-    console.log(response);
+    // console.log(response);
     const responseData = await response.json();
-    console.log(responseData);
+    // console.log(responseData);
     if (response.ok) {
       setTracks(responseData);
       setTracksLoaded(true);
@@ -34,14 +34,28 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
   }
 
   useEffect(()=>{
-    setSelectedAlbum(album);
-    getGroupInfo(album, 'album')
+    if (album) {
+      setSelectedAlbum(album);
+      getGroupInfo(album, 'album');
+    }
   }, [album])
   
   useEffect(()=>{
-    setSelectedPlaylist(playlist)
-    getGroupInfo(playlist, 'playlist')
+    if (playlist) {
+      setSelectedPlaylist(playlist);
+      getGroupInfo(playlist, 'playlist');
+    }
   }, [playlist])
+
+  useEffect(()=>{
+    if (backHome) {
+      setSelectedPlaylist();
+      setSelectedAlbum();
+      setSelectedGroupInfo();
+      setTracksGroup();
+      getAllTracks();
+    }
+  })
 
   const getAllPlaylists = async () => {
     console.log('getting all tracks');
@@ -50,9 +64,9 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
       credentials: 'include',
       withCredentials: true,
     })
-    console.log(response);
+    // console.log(response);
     const responseData = await response.json();
-    console.log(responseData);
+    // console.log(responseData);
     if (response.ok) {
       setPlaylists(responseData);
       setPlaylistsLoaded(true);
@@ -68,9 +82,9 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
       credentials: 'include',
       withCredentials: true,
     })
-    console.log(response);
+    // console.log(response);
     const responseData = await response.json();
-    console.log(responseData);
+    // console.log(responseData);
     if (response.ok) {
       setAlbums(responseData);
       setAlbumsLoaded(true);
@@ -98,7 +112,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
   };
 
   const getGroupInfo = async (selectedid, type) => {
-    console.log('getting playlist info and tracks');
+    console.log('getting playlist info and tracks, selectedid: ' + selectedid + ' type: ' + type);
     console.log(type)
     console.log(selectedid)
     setTracksGroup([]);
@@ -121,7 +135,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
       credentials: 'include',
       withCredentials: true,
     })
-    console.log(response);
+    // console.log(response);
     const responseData = await response.json();
     console.log(responseData);
     if (response.ok) {
@@ -131,10 +145,10 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
         credentials: 'include',
         withCredentials: true,
       })
-      console.log(tracksResponse);
+      // console.log(tracksResponse);
       const responseTracksData = await tracksResponse.json();
       console.log(responseTracksData);
-      if (response.ok) {
+      if (tracksResponse.ok) {
         setTracksGroup(responseTracksData);
       } else {
         console.log('жопа');
@@ -148,8 +162,8 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
     playWave();
   };
   
-  const handleTrackClick = (track) => {
-    trackPlay(track);
+  const handleTrackClick = (track, groupInfo) => {
+    trackPlay(track, groupInfo);
   };  
 
   return (
@@ -267,7 +281,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album }) {
                 {tracksGroup && tracksGroup.length >= 1 &&
                   tracksGroup.map((track)=>{
                     return (
-                      <div className="track" key={track.id}>
+                      <div className="track" key={track.id} onClick={()=>{handleTrackClick(track, selectedGroupInfo)}}>
                         <div className="trackLeftInfo">
                           {track.title}
                         </div>

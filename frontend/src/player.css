@@ -58,8 +58,8 @@
 
 #progress-bar {
     height: 100%;
-    background-color: var(--inputs-hover-color);
-    border-radius: 5px 0 0 5px;
+    background-color: var(--inputs-brighter-hover-color);
+    border-radius: 5px;
 }
 
 #progress-bar-container:active {
@@ -67,9 +67,20 @@
 }
 
 .volume-slider {
-    width: 150px;
-    margin: 5px 0;
-}
+    width: 140px;
+    height: 10px;
+    background-color: var(--inputs-color);
+    position: relative;
+    cursor: pointer;
+    border-radius: 15px;
+    margin: 0 15px;
+  }
+  
+  .volume-progress {
+    height: 100%;
+    background-color: var(--inputs-brighter-hover-color);
+    border-radius: 15px;
+  }  
 
 #progress-bar-container.trackNotLoaded {
     visibility: hidden;

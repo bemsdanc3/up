@@ -56,8 +56,9 @@ function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) 
           credentials: 'include',
           withCredentials: true,
         })
-        console.log(response);
+        // console.log(response);
         const responseData = await response.json();
+        console.log("responseData Albums:");
         console.log(responseData);
         if (response.ok) {
           setAlbums(responseData);
@@ -73,8 +74,9 @@ function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) 
           credentials: 'include',
           withCredentials: true,
         })
-        console.log(response);
+        // console.log(response);
         const responseData = await response.json();
+        console.log("responseData Playlists:");
         console.log(responseData);
         if (response.ok) {
           setPlaylists(responseData);
@@ -144,7 +146,7 @@ function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) 
                         <div id="userAlbums">
                                 {albums.map((album)=>{
                                     return (
-                                        <div className="album" onClick={()=>albumFunc(album.id)}>
+                                        <div key={album.id} className="album" onClick={()=>{console.log('album.id: ' + album.id); albumFunc(album.id)}}>
                                             <img src={album.cover} alt="" />
                                             <span>{album.title}</span>
                                         </div>
@@ -159,7 +161,7 @@ function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) 
                         <div id="userPlaylists">
                                 {playlists.map((playlist)=>{
                                     return (
-                                        <div className="playlist" onClick={()=>playlistFunc(playlist.id)}>
+                                        <div key={playlist.id} className="playlist" onClick={()=>playlistFunc(playlist.id)}>
                                             <img src={playlist.cover} alt="" />
                                             <span>{playlist.title}</span>
                                         </div>
