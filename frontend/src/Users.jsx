@@ -26,9 +26,9 @@ function Users({ userProfile, userData }) {
     console.log(userData)
   }, [])
 
-  const Login = async () => {
+  const updUserRole = async (role, id) => {
     try {
-      const loginRes = await fetch(`http://localhost:8080/users/update/role`,{
+      const loginRes = await fetch(`http://localhost:8080/users/update-role`,{
         method: 'PATCH',
         credentials: 'include',
         withCredentials: true,
@@ -36,8 +36,8 @@ function Users({ userProfile, userData }) {
           "Content-Type": "application/json", 
         },
         body: JSON.stringify({
-          email: email.value,
-          pass: password.value,
+          role: role,
+          user_id: id
         }),
       });
       const responseData = await loginRes.json();
@@ -46,7 +46,7 @@ function Users({ userProfile, userData }) {
       console.log(responseData);
       if (loginRes.ok) {
         console.log("salamalekum")
-        logFunc();
+        getAllUsers();
       } else {
         const errorData = await loginRes.json();
         console.log(errorData.error);
@@ -78,19 +78,19 @@ function Users({ userProfile, userData }) {
                             {userData.user_id != user.id &&
                             <div className="userAdminBtns">
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('admin', user.id)}}
                                     className={user.role == 'admin' ? 'selected' : ''}
                                 >
                                     Admin
                                 </button>
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('artist', user.id)}}
                                     className={user.role == 'artist' ? 'selected' : ''}
                                 >
                                     Artist
                                 </button>
                                 <button 
-                                    onClick={()=>{console.log('btn working')}}
+                                    onClick={(e)=>{e.stopPropagation(); updUserRole('user', user.id)}}
                                     className={user.role == 'user' ? 'selected' : ''}
                                 >
                                     User
