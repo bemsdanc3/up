@@ -28,7 +28,7 @@ function Users({ userProfile, userData }) {
 
   const updUserRole = async (role, id) => {
     try {
-      const loginRes = await fetch(`http://localhost:8080/users/update-role`,{
+      const updUserRoleRes = await fetch(`http://localhost:8080/users/update-role`,{
         method: 'PATCH',
         credentials: 'include',
         withCredentials: true,
@@ -40,15 +40,14 @@ function Users({ userProfile, userData }) {
           user_id: id
         }),
       });
-      const responseData = await loginRes.json();
-      loginData(responseData);
+      const responseData = await updUserRoleRes.json();
       console.log("responseData");
       console.log(responseData);
-      if (loginRes.ok) {
+      if (updUserRoleRes.ok) {
         console.log("salamalekum")
         getAllUsers();
       } else {
-        const errorData = await loginRes.json();
+        const errorData = await updUserRoleRes.json();
         console.log(errorData.error);
       }
     } catch (error) {
