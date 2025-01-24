@@ -34,7 +34,7 @@ function App() {
   return (
     <>
       {!logged && <LoginForm logFunc={() => setLogged(true)} loginData={(data)=>setLoginData(data)}/>}
-      {logged && <Header profileFunc={() => handleProfile('self')} homeFunc={handleHome} loginData={loginData}/>}
+      {logged && <Header profileFunc={() => handleProfile(loginData.user_id)} homeFunc={handleHome} loginData={loginData}/>}
       {logged && userProfile && <Profile userId={userProfile} />}
       {logged && !userProfile && (
         <Home 
