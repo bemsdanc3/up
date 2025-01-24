@@ -14,6 +14,8 @@ function App() {
   const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
   const [userProfile, setUserProfile] = useState('');
   const [loginData, setLoginData] = useState();
+  const [playlist, setPlaylist] = useState();
+  const [album, setAlbum] = useState();
   const [page, setPage] = useState('Home')
 
   const handleProfile = (userid) => {
@@ -23,6 +25,8 @@ function App() {
   
   const handleHome = () => {
     setPage('Home');
+    setPlaylist();
+    setAlbum();
     setUserProfile('');
   };
   
@@ -46,12 +50,26 @@ function App() {
     setTrack(newTrack); // Устанавливаем текущий трек
   };   
 
+  const plalistFunc = (id) => {
+    console.log('playlistFunc')
+    setPlaylist(id); 
+    setAlbum();
+    setPage('Home');
+  }
+
+  const albumFunc = (id) => {
+    console.log('albumFunc')
+    setAlbum(id); 
+    setPlaylist();
+    setPage('Home');
+  }
+
   return (
     <>
       {!logged && 
         <LoginForm 
           logFunc={() => setLogged(true)} 
-          loginData={(data)=>setLoginData(data)}
+          loginData={(data)=>{setLoginData(data); console.log(loginData)}}
         />
       }
       {logged && 
@@ -64,7 +82,13 @@ function App() {
         />
       }
       {logged && userProfile && page == 'Profile' &&
-        <Profile userId={userProfile} myData={loginData} handleTrackClick={playTrack}/>
+        <Profile 
+          userId={userProfile} 
+          myData={loginData} 
+          handleTrackClick={playTrack}
+          playlistFunc={(id)=>{plalistFunc((id))}}
+          albumFunc={(id)=>{albumFunc(id)}}
+        />
       }
       {logged && page == 'Users' &&
         <Users 
@@ -81,6 +105,9 @@ function App() {
         <Home 
           trackPlay={playTrack} 
           playWave={playWave} 
+          loginData={loginData}
+          playlist={playlist}
+          album={album}
         />
       }
       {logged && 

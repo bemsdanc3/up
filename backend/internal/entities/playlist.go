@@ -10,6 +10,7 @@ type Playlist struct {
 	Cover        string     `json:"cover,omitempty"`
 	Description  string     `json:"description,omitempty"`
 	IsPublic     bool       `json:"ispublic,omitempty"`
+	AuthorLogin  string     `json:"authorLogin,omitempty"`
 	Tracks       []Track    `json:"tracks,omitempty"`
 }
 

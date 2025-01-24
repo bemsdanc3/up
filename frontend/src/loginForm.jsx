@@ -21,9 +21,11 @@ function LoginForm({ logFunc, loginData }) {
           login: login.value
         }),
       });
+      const responseData = await loginRes.json();
       if (loginRes.ok) {
         console.log("salamalekum")
         logFunc();
+        loginData(responseData);
       } else {
         const errorData = await loginRes.json();
         console.log(errorData.error);

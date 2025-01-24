@@ -156,7 +156,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	favoritePlaylist := &entities.Playlist{
 		Title:       "Любимые треки",
 		AuthorID:    newUser.ID,
-		Cover:       "",
+		Cover:       "http://localhost:8080/uploads/cover-playlist/rnqa7yhv4il71.webp",
 		Description: "Автоматически созданный плейлист для любимых треков",
 		IsPublic:    false,
 	}
@@ -170,6 +170,8 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
 		return
 	}
+
+	userId := newUser.ID
 
 	http.SetCookie(w, &http.Cookie{ // токен в куки
 		Name:     "token",
@@ -200,7 +202,11 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "user created successfully"})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "user created successfully",
+		"role":    "user",
+		"user_id": userId,
+	})
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
