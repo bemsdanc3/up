@@ -148,7 +148,7 @@ func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
 }
 
 func (r *userRepository) GetAllUsers() ([]entities.User, error) {
-	query := `SELECT id, login, email, role, pfp FROM users`
+	query := `SELECT id, login, email, role, pfp, creation_date FROM users ORDER BY creation_date`
 	rows, err := r.db.Query(query)
 	if err != nil {
 		log.Printf("error getting users on database lvl: %v", err)
@@ -165,6 +165,7 @@ func (r *userRepository) GetAllUsers() ([]entities.User, error) {
 			&user.Email,
 			&user.Role,
 			&user.PFP,
+			&user.CreationDate,
 		); err != nil {
 			log.Printf("error scanning row: %v", err)
 			return nil, err
