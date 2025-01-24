@@ -49,6 +49,7 @@ func Run() {
 	authRouter.HandleFunc("/users/profile/{id}", userHandler.GetUserProfile).Methods(http.MethodGet)
 	authRouter.HandleFunc("/refresh-token", userHandler.RefreshToken).Methods(http.MethodPost)
 	authRouter.HandleFunc("/logout", userHandler.Logout).Methods(http.MethodPost)
+	authRouter.HandleFunc("/users", userHandler.GetAllUsers).Methods(http.MethodGet)
 
 	//запросы с плейлистами
 

@@ -14,6 +14,7 @@ type UserUseCase interface {
 	GetUserDetails(userID int) (*entities.UserDetails, error)
 	UpdateUserProfile(user *entities.User, userID int) error
 	GetUserProfile(userID int) (*entities.User, error)
+	GetAllUsers() ([]entities.User, error)
 }
 
 type userUseCase struct {
@@ -88,4 +89,8 @@ func (u *userUseCase) UpdateUserProfile(user *entities.User, userID int) error {
 
 func (u *userUseCase) GetUserProfile(userID int) (*entities.User, error) {
 	return u.repo.GetUserProfile(userID)
+}
+
+func (u *userUseCase) GetAllUsers() ([]entities.User, error) {
+	return u.repo.GetAllUsers()
 }
