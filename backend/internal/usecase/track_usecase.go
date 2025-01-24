@@ -16,6 +16,8 @@ type TrackUsecase interface {
 	GetRandomTrack() (*entities.Track, error)
 	GetTrackByAuthorID(authorID int) ([]entities.Track, error)
 	GetRandomTrackByGenre(genreID int) (*entities.Track, error)
+	GetTracksByPlaylistID(playlistID int) ([]entities.Track, error)
+	GetTracksByAlbumID(albumID int) ([]entities.Track, error)
 }
 
 type trackUsecase struct {
@@ -72,4 +74,12 @@ func (u *trackUsecase) GetTrackByAuthorID(authorID int) ([]entities.Track, error
 
 func (u *trackUsecase) GetRandomTrackByGenre(genreID int) (*entities.Track, error) {
 	return u.repo.GetRandomTrackByGenre(genreID)
+}
+
+func (u *trackUsecase) GetTracksByPlaylistID(playlistID int) ([]entities.Track, error) {
+	return u.repo.GetTracksByPlaylistID(playlistID)
+}
+
+func (u *trackUsecase) GetTracksByAlbumID(albumID int) ([]entities.Track, error) {
+	return u.repo.GetTracksByAlbumID(albumID)
 }
