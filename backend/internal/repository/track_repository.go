@@ -15,6 +15,7 @@ type TrackRepository interface {
 	GetAllTracks() ([]entities.Track, error)
 	GetTrackCount() (int, error)
 	GetRandomTrack(offset int) (*entities.Track, error)
+	//трек по айдишнику плейлиста и альбома, мои треки, которые я загрузил
 	GetTrackByAuthorID(authorID int) ([]entities.Track, error)
 	GetRandomTrackByGenre(genreID int) (*entities.Track, error)
 }

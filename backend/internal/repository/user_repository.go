@@ -16,6 +16,8 @@ type UserRepository interface {
 	GetSubscriptionsByUserID(userID int) ([]int, error)
 	UpdateUserProfile(user *entities.User, userID int) error
 	GetUserProfile(userID int) (*entities.User, error)
+	GetAllUsers() ([]entities.User, error)
+	//все пользователи, изменение роли пользователя
 }
 
 type userRepository struct {
@@ -134,7 +136,7 @@ func (r *userRepository) UpdateUserProfile(user *entities.User, userID int) erro
 func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
 	query := `SELECT login, pfp, email FROM users WHERE id = $1`
 	var user entities.User
-	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP)
+	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
@@ -143,4 +145,35 @@ func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) GetAllUsers() ([]entities.User, error) {
+	query := `SELECT id, login, email, role, pfp FROM users`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		log.Printf("error getting users on database lvl: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []entities.User
+	for rows.Next() {
+		var user entities.User
+		if err = rows.Scan(
+			&user.ID,
+			&user.Login,
+			&user.Email,
+			&user.Role,
+			&user.PFP,
+		); err != nil {
+			log.Printf("error scanning row: %v", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("row iteration error: %v", err)
+		return nil, err
+	}
+	return users, err
 }

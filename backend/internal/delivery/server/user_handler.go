@@ -268,7 +268,11 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "login successful"})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "login successful",
+		"role":    user.Role,
+		"user_id": user.ID,
+	})
 }
 
 func (h *UserHandler) GetUserDetailsByID(w http.ResponseWriter, r *http.Request) {
@@ -438,4 +442,21 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})
+}
+
+func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	users, err := h.usecase.GetAllUsers()
+	if err != nil {
+		log.Printf("error getting users: %v", err)
+		http.Error(w, "error getting users", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }
