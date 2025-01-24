@@ -29,7 +29,7 @@ function Home({ trackPlay, playWave }) {
 
   const getAllPlaylists = async () => {
     console.log('getting all tracks');
-    const response = await fetch('http://localhost:8080/playlists/all', {
+    const response = await fetch('http://localhost:8080/playlists/my/all', {
       method: 'GET',
       credentials: 'include',
       withCredentials: true,

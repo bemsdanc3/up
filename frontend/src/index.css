@@ -29,6 +29,7 @@ body {
   /* justify-content: center; */
   --bg-color: rgb(23, 36, 34);
   --panels-color: rgb(29, 53, 49);
+  --panels-hover-color: rgb(35, 65, 60);
   --inputs-color: rgb(38, 80, 73);
   --inputs-hover-color: rgb(43, 95, 86);
   --text-color: rgb(211, 252, 241);
@@ -310,6 +311,60 @@ button:hover {
 
 #userInfo #userTextInfo {
   margin: 15px;
+}
+
+#usersPage {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 170px);
+  overflow-y: scroll;
+}
+
+#usersPage .user {
+  display: flex;
+  margin: 10px 5px;
+  padding: 5px;
+  align-items: center;
+  background-color: var(--panels-color);
+  border-radius: 5px;
+  justify-content: space-between;
+  &:hover {
+    cursor: pointer;
+    background-color: var(--panels-hover-color);
+  }
+}
+
+#usersPage .user .userAdminBtns {
+  display: flex;
+}
+
+#usersPage .user .userAdminBtns button.selected {
+  outline: 2px solid rgba(63, 233, 63, 0.452);
+}
+
+#usersPage .user .userLeftInfo {
+  display: flex;
+}
+
+#usersPage .user .userLeftInfo img {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+}
+
+#usersPage .user .userCardTextInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#usersPage .user .userLoginAndRole span {
+  margin-right: 5px;
+}
+
+#usersPage .user .userLoginAndRole span.usrCardRole {
+  opacity: 0.4;
 }
 
 #profilePage #userTracks {

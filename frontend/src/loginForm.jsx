@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function LoginForm({ logFunc }) {
+function LoginForm({ logFunc, loginData }) {
   const [isLogin, setIsLogin] = useState(true);
 
     const Register = async () => {
@@ -49,6 +49,10 @@ function LoginForm({ logFunc }) {
             pass: password.value,
           }),
         });
+        const responseData = await loginRes.json();
+        loginData(responseData);
+        console.log("responseData");
+        console.log(responseData);
         if (loginRes.ok) {
           console.log("salamalekum")
           logFunc();

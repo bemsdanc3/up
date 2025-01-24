@@ -4,6 +4,7 @@ import Header from './Header.jsx'
 import Profile from './Profile.jsx'
 import Home from './Home.jsx'
 import Player from './Player.jsx'
+import Users from './Users.jsx'
 
 function App() {
   const [logged, setLogged] = useState(false);
@@ -11,12 +12,26 @@ function App() {
   const [isWavePlaying, setIsWavePlaying] = useState(false); // состояние волны
   const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
   const [userProfile, setUserProfile] = useState('');
+  const [loginData, setLoginData] = useState();
+  const [page, setPage] = useState('Home')
 
   const handleProfile = (userid) => {
     setUserProfile(userid);
+    setPage('Profile');
   };
-
+  
   const handleHome = () => {
+    setPage('Home');
+    setUserProfile('');
+  };
+  
+  const handleUsers = () => {
+    setPage('Users');
+    setUserProfile('');
+  };
+  
+  const handleTracks = () => {
+    setPage('Tracks');
     setUserProfile('');
   };
 
@@ -32,22 +47,42 @@ function App() {
 
   return (
     <>
-      {!logged && <LoginForm logFunc={() => setLogged(true)} />}
-      {logged && <Header profileFunc={() => handleProfile('self')} homeFunc={handleHome} />}
-      {logged && userProfile && <Profile userId={userProfile} />}
-      {logged && !userProfile && (
+      {!logged && 
+        <LoginForm 
+          logFunc={() => setLogged(true)} 
+          loginData={(data)=>setLoginData(data)}
+        />
+      }
+      {logged && 
+        <Header 
+          profileFunc={() => handleProfile(loginData.user_id)} 
+          homeFunc={handleHome} 
+          loginData={loginData}
+          usersFunc={handleUsers}
+          tracksFunc={handleTracks}
+        />
+      }
+      {logged && userProfile && page == 'Profile' &&
+        <Profile userId={userProfile} />
+      }
+      {logged && page == 'Users' &&
+        <Users 
+          userProfile={(id)=>handleProfile(id)}
+        />
+      }
+      {logged && page == 'Home' && 
         <Home 
           trackPlay={playTrack} 
           playWave={playWave} 
         />
-      )}
-      {logged && (
+      }
+      {logged && 
         <Player 
           track={track} 
           isWavePlaying={isWavePlaying} 
           userProfile={handleProfile} 
         />
-      )}
+      }
     </>
   );
 }
