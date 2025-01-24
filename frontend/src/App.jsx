@@ -11,6 +11,7 @@ function App() {
   const [isWavePlaying, setIsWavePlaying] = useState(false); // состояние волны
   const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
   const [userProfile, setUserProfile] = useState('');
+  const [loginData, setLoginData] = useState();
 
   const handleProfile = (userid) => {
     setUserProfile(userid);
@@ -32,8 +33,8 @@ function App() {
 
   return (
     <>
-      {!logged && <LoginForm logFunc={() => setLogged(true)} />}
-      {logged && <Header profileFunc={() => handleProfile('self')} homeFunc={handleHome} />}
+      {!logged && <LoginForm logFunc={() => setLogged(true)} loginData={(data)=>setLoginData(data)}/>}
+      {logged && <Header profileFunc={() => handleProfile('self')} homeFunc={handleHome} loginData={loginData}/>}
       {logged && userProfile && <Profile userId={userProfile} />}
       {logged && !userProfile && (
         <Home 
