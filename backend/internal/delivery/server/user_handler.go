@@ -460,3 +460,40 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+func (h *UserHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var requestBody struct {
+		Role   string `json:"role,omitempty"`
+		UserID int    `json:"user_id,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		log.Printf("error reading req body: %v", err)
+		return
+	}
+
+	if requestBody.UserID == 0 || requestBody.Role == "" {
+		http.Error(w, "Invalid user ID or role", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.usecase.UpdateUsersRole(requestBody.UserID, requestBody.Role); err != nil {
+		if err.Error() == "user not found" {
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
+			log.Printf("Error updating user role: %v", err)
+			http.Error(w, "Error updating user role", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "user role updated successfully",
+	})
+}

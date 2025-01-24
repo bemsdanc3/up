@@ -17,7 +17,7 @@ type UserRepository interface {
 	UpdateUserProfile(user *entities.User, userID int) error
 	GetUserProfile(userID int) (*entities.User, error)
 	GetAllUsers() ([]entities.User, error)
-	//все пользователи, изменение роли пользователя
+	UpdateUsersRole(userID int, role string) error
 }
 
 type userRepository struct {
@@ -176,4 +176,26 @@ func (r *userRepository) GetAllUsers() ([]entities.User, error) {
 		return nil, err
 	}
 	return users, err
+}
+
+func (r *userRepository) UpdateUsersRole(userID int, role string) error {
+	query := `UPDATE users set role = $1 WHERE id = $2`
+	result, err := r.db.Exec(query, role, userID)
+	if err != nil {
+		log.Printf("error updating role on database lvl: %v", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("error getting rows affected: %v", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		log.Printf("user not found")
+		return err
+	}
+
+	return nil
 }

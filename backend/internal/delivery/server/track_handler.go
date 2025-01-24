@@ -255,3 +255,51 @@ func (h *TrackHandler) GetTrackByGenreID(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(track)
 }
+
+func (h *TrackHandler) GetTracksByPlaylistID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	playlistID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	playlist, err := h.usecase.GetTracksByPlaylistID(playlistID)
+	if err != nil {
+		http.Error(w, "Error fetching tracks", http.StatusInternalServerError)
+		log.Printf("Error in handler: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlist)
+}
+
+func (h *TrackHandler) GetTracksByAlbumID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	albumID, err := getIDFromRouter(r)
+	if err != nil {
+		log.Printf("Error getting ID from route: %v", err)
+		http.Error(w, "invalid id in route", http.StatusBadRequest)
+		return
+	}
+
+	album, err := h.usecase.GetTracksByAlbumID(albumID)
+	if err != nil {
+		http.Error(w, "Error fetching tracks", http.StatusInternalServerError)
+		log.Printf("Error in handler: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(album)
+}

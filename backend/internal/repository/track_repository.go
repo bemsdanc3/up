@@ -15,9 +15,10 @@ type TrackRepository interface {
 	GetAllTracks() ([]entities.Track, error)
 	GetTrackCount() (int, error)
 	GetRandomTrack(offset int) (*entities.Track, error)
-	//трек по айдишнику плейлиста и альбома, мои треки, которые я загрузил
 	GetTrackByAuthorID(authorID int) ([]entities.Track, error)
 	GetRandomTrackByGenre(genreID int) (*entities.Track, error)
+	GetTracksByPlaylistID(playlistID int) ([]entities.Track, error)
+	GetTracksByAlbumID(albumID int) ([]entities.Track, error)
 }
 
 type trackRepository struct {
@@ -300,4 +301,109 @@ func (r *trackRepository) GetRandomTrackByGenre(genreID int) (*entities.Track, e
 	}
 
 	return &track, nil
+}
+
+func (r *trackRepository) GetTracksByPlaylistID(playlistID int) ([]entities.Track, error) {
+	query := `SELECT 
+			t.id AS track_id, 
+			t.title, 
+			t.duration, 
+			t.album_id, 
+			t.genre_id, 
+			t.tracklink, 
+			t.listen_count, 
+			a.cover AS album_cover, 
+			a.author_id AS album_author_id, 
+			u.login AS album_author_login
+		FROM 
+			playlist_tracks pt
+		JOIN 
+			tracks t ON pt.track_id = t.id
+		LEFT JOIN 
+			albums a ON t.album_id = a.id
+		LEFT JOIN 
+			users u ON a.author_id = u.id
+		WHERE 
+			pt.playlist_id = $1`
+
+	rows, err := r.db.Query(query, playlistID)
+	if err != nil {
+		log.Printf("error getting all tracks by playlist id on database lvl: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tracks []entities.Track
+	for rows.Next() {
+		var track entities.Track
+		if err = rows.Scan(
+			&track.ID,
+			&track.Title,
+			&track.Duration,
+			&track.AlbumID,
+			&track.GenreID,
+			&track.TrackLink,
+			&track.ListenCount,
+			&track.Cover,
+			&track.AuthorID,
+			&track.AuthorLogin,
+		); err != nil {
+			log.Printf("error scanning track row: %v", err)
+			return nil, err
+		}
+		tracks = append(tracks, track)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("error iterating over rows: %v", err)
+		return nil, err
+	}
+
+	return tracks, nil
+}
+
+func (r *trackRepository) GetTracksByAlbumID(albumID int) ([]entities.Track, error) {
+	query := `SELECT 
+			t.id AS track_id, 
+			t.title, 
+			t.duration, 
+			t.album_id, 
+			t.genre_id, 
+			t.tracklink, 
+			t.listen_count
+		FROM 
+			tracks t
+		WHERE 
+			t.album_id = $1`
+
+	rows, err := r.db.Query(query, albumID)
+	if err != nil {
+		log.Printf("error getting tracks by album id on database lvl: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tracks []entities.Track
+	for rows.Next() {
+		var track entities.Track
+		if err = rows.Scan(
+			&track.ID,
+			&track.Title,
+			&track.Duration,
+			&track.AlbumID,
+			&track.GenreID,
+			&track.TrackLink,
+			&track.ListenCount,
+		); err != nil {
+			log.Printf("error scanning track row: %v", err)
+			return nil, err
+		}
+		tracks = append(tracks, track)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Printf("Error iterating over rows: %v", err)
+		return nil, err
+	}
+
+	return tracks, nil
 }

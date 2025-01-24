@@ -50,6 +50,7 @@ func Run() {
 	authRouter.HandleFunc("/refresh-token", userHandler.RefreshToken).Methods(http.MethodPost)
 	authRouter.HandleFunc("/logout", userHandler.Logout).Methods(http.MethodPost)
 	authRouter.HandleFunc("/users", userHandler.GetAllUsers).Methods(http.MethodGet)
+	authRouter.HandleFunc("/users/update-role", userHandler.UpdateRole).Methods(http.MethodPost)
 
 	//запросы с плейлистами
 
@@ -70,6 +71,8 @@ func Run() {
 	authRouter.HandleFunc("/tracks/random", trackHandler.GetRandomTrack).Methods(http.MethodGet)
 	authRouter.HandleFunc("/tracks/all/{id}", trackHandler.GetTrackByAuthorID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/tracks/random-genre/{id}", trackHandler.GetTrackByGenreID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/tracks/by/playlist/{id}", trackHandler.GetTracksByPlaylistID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/tracks/by/album/{id}", trackHandler.GetTracksByAlbumID).Methods(http.MethodGet)
 
 	//запросы с альбомами
 	authRouter.HandleFunc("/album/create", albumHandler.CreateAlbum).Methods(http.MethodPost)
