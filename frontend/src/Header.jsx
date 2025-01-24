@@ -28,7 +28,7 @@ function Header({ profileFunc, homeFunc, loginData, usersFunc, tracksFunc }) {
             </>
             }
         </div>
-        <div id="headerCenter">
+        {/* <div id="headerCenter">
             <div id="searchDiv">
                 <input type="text" />
                 <button>
@@ -36,7 +36,7 @@ function Header({ profileFunc, homeFunc, loginData, usersFunc, tracksFunc }) {
                   Поиск
                 </button>
             </div>
-        </div>
+        </div> */}
         <div id="headerRight">
             <button onClick={()=>{profileFunc()}}>
               <ProfileIcon />
