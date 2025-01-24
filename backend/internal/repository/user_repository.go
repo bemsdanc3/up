@@ -134,9 +134,9 @@ func (r *userRepository) UpdateUserProfile(user *entities.User, userID int) erro
 }
 
 func (r *userRepository) GetUserProfile(userID int) (*entities.User, error) {
-	query := `SELECT login, pfp, email FROM users WHERE id = $1`
+	query := `SELECT login, pfp, email, role FROM users WHERE id = $1`
 	var user entities.User
-	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP, &user.Email)
+	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.PFP, &user.Email, &user.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
