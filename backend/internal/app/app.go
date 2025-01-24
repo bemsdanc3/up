@@ -50,7 +50,7 @@ func Run() {
 	authRouter.HandleFunc("/refresh-token", userHandler.RefreshToken).Methods(http.MethodPost)
 	authRouter.HandleFunc("/logout", userHandler.Logout).Methods(http.MethodPost)
 	authRouter.HandleFunc("/users", userHandler.GetAllUsers).Methods(http.MethodGet)
-	authRouter.HandleFunc("/users/update-role", userHandler.UpdateRole).Methods(http.MethodPost)
+	authRouter.HandleFunc("/users/update-role", userHandler.UpdateRole).Methods(http.MethodPatch)
 
 	//запросы с плейлистами
 
