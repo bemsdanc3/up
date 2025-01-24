@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function Profile({ userId }) {
+function Profile({ userId, userData }) {
     const [userData, setUserData] = useState({})
     const [tracks, setTracks] = useState([])
     const [albums, setAlbums] = useState([])
@@ -11,12 +11,7 @@ function Profile({ userId }) {
 
     const loadProfileInfo = async () => {
         try {
-            let userLink;
-            if (userId == 'self') {
-                userLink = 'user/my/profile'
-            } else {
-                userLink = `users/profile/${userId}`
-            }
+            let userLink = `users/profile/${userId}`;
             const userProfileRes = await fetch(`http://localhost:8080/${userLink}`,{
                 method: 'GET',
                 credentials: 'include',

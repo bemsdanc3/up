@@ -63,7 +63,7 @@ function App() {
         />
       }
       {logged && userProfile && page == 'Profile' &&
-        <Profile userId={userProfile} />
+        <Profile userId={userProfile} userData={loginData}/>
       }
       {logged && page == 'Users' &&
         <Users 
