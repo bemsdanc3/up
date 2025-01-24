@@ -68,6 +68,7 @@ function App() {
       {logged && page == 'Users' &&
         <Users 
           userProfile={(id)=>handleProfile(id)}
+          userData={loginData}
         />
       }
       {logged && page == 'Home' && 

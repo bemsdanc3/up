@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function Users({ userProfile }) {
+function Users({ userProfile, userData }) {
   const [users, setUsers] = useState([]);
 
   const getAllUsers = async () => {
@@ -23,6 +23,7 @@ function Users({ userProfile }) {
 
   useEffect(()=>{
     getAllUsers();
+    console.log(userData)
   }, [])
 
   return (
@@ -44,6 +45,7 @@ function Users({ userProfile }) {
                                     <span>{user.email}</span>
                                 </div>
                             </div>
+                            {userData.user_id != user.id &&
                             <div className="userAdminBtns">
                                 <button 
                                     onClick={()=>{console.log('btn working')}}
@@ -63,7 +65,7 @@ function Users({ userProfile }) {
                                 >
                                     User
                                 </button>
-                            </div>
+                            </div>}
                         </div>
                     )
                 })
