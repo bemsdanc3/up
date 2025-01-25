@@ -9,11 +9,13 @@ import Tracks from './Tracks.jsx'
 
 function App() {
   const [logged, setLogged] = useState(false);
+  const [backHome, setBackHome] = useState(false);
   const [track, setTrack] = useState(null);
   const [isWavePlaying, setIsWavePlaying] = useState(false); // состояние волны
   const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
   const [userProfile, setUserProfile] = useState('');
   const [loginData, setLoginData] = useState();
+  const [groupInfo, setGroupInfo] = useState();
   const [playlist, setPlaylist] = useState();
   const [album, setAlbum] = useState();
   const [page, setPage] = useState('Home')
@@ -25,6 +27,10 @@ function App() {
   
   const handleHome = () => {
     setPage('Home');
+    setBackHome(true);
+    setInterval(()=>{
+      setBackHome(false);
+    }, 0)
     setPlaylist();
     setAlbum();
     setUserProfile('');
@@ -45,22 +51,25 @@ function App() {
     setTrack(null); // Сбрасываем текущий трек
   };
   
-  const playTrack = (newTrack) => {
+  const playTrack = (newTrack, groupInfo) => {
     setIsWavePlaying(false); // Останавливаем волну
     setTrack(newTrack); // Устанавливаем текущий трек
+    if (groupInfo) {
+      setGroupInfo(groupInfo);
+    }
   };   
 
-  const plalistFunc = (id) => {
-    console.log('playlistFunc')
-    setPlaylist(id); 
+  const playlistFunc = (id) => {
+    console.log('playlistFunc, playlist.id: ' + id)
     setAlbum();
+    setPlaylist(id); 
     setPage('Home');
   }
 
   const albumFunc = (id) => {
-    console.log('albumFunc')
-    setAlbum(id); 
+    console.log('albumFunc, album.id: ' + id)
     setPlaylist();
+    setAlbum(id); 
     setPage('Home');
   }
 
@@ -86,8 +95,8 @@ function App() {
           userId={userProfile} 
           myData={loginData} 
           handleTrackClick={playTrack}
-          playlistFunc={(id)=>{plalistFunc((id))}}
-          albumFunc={(id)=>{albumFunc(id)}}
+          playlistFunc={playlistFunc}
+          albumFunc={albumFunc}
         />
       }
       {logged && page == 'Users' &&
@@ -108,6 +117,7 @@ function App() {
           loginData={loginData}
           playlist={playlist}
           album={album}
+          backHome={backHome}
         />
       }
       {logged && 
@@ -115,6 +125,7 @@ function App() {
           track={track} 
           isWavePlaying={isWavePlaying} 
           userProfile={handleProfile} 
+          groupInfo={groupInfo}
         />
       }
     </>

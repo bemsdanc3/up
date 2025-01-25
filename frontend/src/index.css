@@ -32,6 +32,7 @@ body {
   --panels-hover-color: rgb(35, 65, 60);
   --inputs-color: rgb(38, 80, 73);
   --inputs-hover-color: rgb(43, 95, 86);
+  --inputs-brighter-hover-color: rgb(52, 119, 108);
   --text-color: rgb(211, 252, 241);
   color: var(--text-color);
   background-color: var(--bg-color);
