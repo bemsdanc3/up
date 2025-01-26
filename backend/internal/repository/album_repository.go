@@ -25,8 +25,8 @@ func NewAlbumRepository(db *sql.DB) AlbumRepository {
 }
 
 func (r *albumRepository) CreateAlbum(album *entities.Album) error {
-	query := `INSERT INTO albums (type_of, title, cover, label) VALUES ($1,$2,$3,$4)`
-	_, err := r.db.Exec(query, album.TypeOf, album.Title, album.Cover, album.Label)
+	query := `INSERT INTO albums (type_of, title, cover, label, author_id) VALUES ($1,$2,$3,$4,$5)`
+	_, err := r.db.Exec(query, album.TypeOf, album.Title, album.Cover, album.Label, album.AuthorID)
 	if err != nil {
 		log.Printf("error creating album on database lvl: %v", err)
 		return err

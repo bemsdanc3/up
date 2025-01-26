@@ -18,6 +18,7 @@ type PlaylistRepository interface {
 	GetFavoritePlaylist(userID int) (*entities.Playlist, error)
 	AddTrackToFavorite(playlistID, trackID int) error
 	GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error)
+	IsTrackInPlaylist(playlistID, trackID int) (bool, error)
 }
 
 type playlistRepository struct {
@@ -176,13 +177,26 @@ func (r *playlistRepository) GetFavoritePlaylist(userID int) (*entities.Playlist
 }
 
 func (r *playlistRepository) AddTrackToFavorite(playlistID, trackID int) error {
-	query := `INSERT INTO playlist_tracks (playlist_id, track_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`
-	_, err := r.db.Exec(query, playlistID, trackID)
+	var exists bool
+	checkQuery := `SELECT EXISTS (SELECT 1 FROM playlist_tracks WHERE playlist_id = $1 AND track_id = $2)`
+	err := r.db.QueryRow(checkQuery, playlistID, trackID).Scan(&exists)
+	if err != nil {
+		log.Printf("error checking if track exists in playlist: %v", err)
+		return err
+	}
+
+	if exists {
+		log.Println("Track is already in favorite playlist")
+		return fmt.Errorf("track already in favorite playlist")
+	}
+
+	query := `INSERT INTO playlist_tracks (playlist_id, track_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`
+	_, err = r.db.Exec(query, playlistID, trackID)
 	if err != nil {
 		log.Printf("error adding track to favorite on database lvl: %v", err)
 		return err
 	}
-	return err
+	return nil
 }
 
 func (r *playlistRepository) GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error) {
@@ -209,4 +223,15 @@ func (r *playlistRepository) GetAllPlaylistsByAuthorID(authorID int) ([]entities
 		playlists = append(playlists, playlist)
 	}
 	return playlists, err
+}
+
+func (r *playlistRepository) IsTrackInPlaylist(playlistID, trackID int) (bool, error) {
+	query := `SELECT EXISTS (SELECT 1 FROM playlist_tracks WHERE playlist_id = $1 AND track_id = $2)`
+	var exists bool
+	err := r.db.QueryRow(query, playlistID, trackID).Scan(&exists)
+	if err != nil {
+		log.Printf("error checking if track exists in playlist: %v", err)
+		return false, err
+	}
+	return exists, nil
 }

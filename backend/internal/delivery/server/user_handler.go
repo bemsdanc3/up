@@ -3,6 +3,7 @@ package server
 import (
 	"backend/internal/entities"
 	"backend/internal/usecase"
+	"backend/pkg/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -137,11 +139,16 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Установить стандартное значение аватарки
+	newUser.PFP = "http://localhost:8080/uploads/users-pfp/frog.jpg"
+
+	// Проверка пароля
 	if err := ValidatePassword(newUser.Pass); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	// Создание пользователя
 	if err := h.usecase.CreateUser(&newUser); err != nil {
 		if err.Error() == "email is already in use" {
 			http.Error(w, "email is already in use", http.StatusBadRequest)
@@ -153,6 +160,8 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	// Создание плейлиста для любимых треков
 	favoritePlaylist := &entities.Playlist{
 		Title:       "Любимые треки",
 		AuthorID:    newUser.ID,
@@ -164,6 +173,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error creating favorite playlist: %v", err)
 	}
 
+	// Генерация токенов
 	token, refreshToken, err := generateTokens(newUser)
 	if err != nil {
 		log.Printf("Error generating token: %v", err)
@@ -171,9 +181,9 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//userId := newUser.ID
-
 	http.SetCookie(w, &http.Cookie{ // токен в куки
+	// Установка куки
+	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour),
@@ -182,7 +192,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 	})
-	http.SetCookie(w, &http.Cookie{ // токен в куки
+	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
@@ -191,7 +201,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 	})
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "user_id",
 		Value:    strconv.Itoa(newUser.ID),
@@ -205,7 +214,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "user created successfully",
 		"role":    "user",
-		"user_id": strconv.Itoa(newUser.ID),
+		"user_id": newUser.ID,
 	})
 }
 
@@ -311,13 +320,6 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var updatedUser entities.User
-	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
-		log.Printf("cant read updated user body: %v", err)
-		http.Error(w, "invalid user ID", http.StatusBadRequest)
-		return
-	}
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("Cant get user ID from cookie: %v", err)
@@ -325,10 +327,35 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if userID <= 0 {
-		http.Error(w, "user ID can be less then zero", http.StatusBadRequest)
+	if err = r.ParseMultipartForm(10 << 20); err != nil {
+		log.Printf("error parsing multipart form: %v", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
 		return
 	}
+
+	file, handler, err := r.FormFile("pfp")
+	if err != nil {
+		log.Printf("error retrieving file: %v", err)
+		http.Error(w, "invalid pfp file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	uploadDir := "./uploads/users-pfp/"
+	coverPath, err := utils.UploadFile(file, handler, uploadDir)
+	if err != nil {
+		log.Printf("error uploading cover file: %v", err)
+		http.Error(w, "failed to upload cover", http.StatusInternalServerError)
+		return
+	}
+	// Генерация URL для обложки
+	pfpLink := "http://localhost:8080/uploads/users-pfp/" + filepath.Base(coverPath)
+
+	var updatedUser entities.User
+	updatedUser.Login = r.FormValue("login")
+	updatedUser.Email = r.FormValue("email")
+	updatedUser.Pass = r.FormValue("pass")
+	updatedUser.PFP = pfpLink
 
 	err = h.usecase.UpdateUserProfile(&updatedUser, userID)
 	if err != nil {
