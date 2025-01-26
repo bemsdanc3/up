@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function LoginForm({ logFunc, loginData }) {
+function LoginForm({ loginData }) {
   const [isLogin, setIsLogin] = useState(true);
 
     const Register = async () => {
@@ -24,7 +24,6 @@ function LoginForm({ logFunc, loginData }) {
       const responseData = await loginRes.json();
       if (loginRes.ok) {
         console.log("salamalekum")
-        logFunc();
         loginData(responseData);
       } else {
         const errorData = await loginRes.json();
@@ -52,12 +51,11 @@ function LoginForm({ logFunc, loginData }) {
           }),
         });
         const responseData = await loginRes.json();
-        loginData(responseData);
         console.log("responseData");
         console.log(responseData);
         if (loginRes.ok) {
           console.log("salamalekum")
-          logFunc();
+          loginData(responseData);
         } else {
           const errorData = await loginRes.json();
           console.log(errorData.error);

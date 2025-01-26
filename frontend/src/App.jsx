@@ -77,8 +77,7 @@ function App() {
     <>
       {!logged && 
         <LoginForm 
-          logFunc={() => setLogged(true)} 
-          loginData={(data)=>{setLoginData(data); console.log(loginData)}}
+          loginData={(data)=>{setLogged(true); setLoginData(data); console.log(loginData)}}
         />
       }
       {logged && 

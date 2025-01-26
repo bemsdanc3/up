@@ -341,7 +341,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
                       </div>
                       <div className="trackRightInfo">
                         {formatDuration(track.duration)}
-                        {selectedGroupInfo.author_id == loginData.user_id &&
+                        {selectedGroupInfo.author_id == loginData.user_id && !selectedPlaylist &&
                           <button onClick={(e)=>{e.preventDefault(); trackDelete(track.id)}}>
                             Удалить
                           </button>

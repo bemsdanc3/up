@@ -91,7 +91,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   useEffect(() => {
     if (track) {
       if (groupInfo) {
-        setPlayingTrackInfo({ ...track, author_login: groupInfo.authorLogin, cover: groupInfo.cover });
+        setPlayingTrackInfo({ ...track, author_id: groupInfo.author_id, author_login: groupInfo.authorLogin, cover: groupInfo.cover });
       } else {
         setPlayingTrackInfo(track);
       }
@@ -122,6 +122,23 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
 
   const getRandomTrack = async () => {
     const response = await fetch('http://localhost:8080/tracks/random', {
+      method: 'GET',
+      credentials: 'include',
+      withCredentials: true,
+    })
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log(responseData);
+      setIsPlaying(true);
+      setPlayingTrackInfo(responseData);
+      setTrackLoaded(true);
+    } else {
+      console.log('жопа');
+    }
+  }
+
+  const isTrackLiked = async () => {
+    const response = await fetch('http://localhost:8080/playlists/track/check', {
       method: 'GET',
       credentials: 'include',
       withCredentials: true,
