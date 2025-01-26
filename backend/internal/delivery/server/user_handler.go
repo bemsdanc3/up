@@ -181,6 +181,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	http.SetCookie(w, &http.Cookie{ // токен в куки
 	// Установка куки
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
