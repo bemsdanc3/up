@@ -180,9 +180,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
 		return
 	}
-
-	http.SetCookie(w, &http.Cookie{ // токен в куки
-	// Установка куки
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
