@@ -26,12 +26,6 @@ func NewTrackHandler(usecase usecase.TrackUsecase, playlistUsecase usecase.Playl
 }
 
 func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Ограничение на размер файла (например, 10MB)
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		log.Printf("error parsing form: %v", err)
@@ -39,7 +33,6 @@ func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получение файла из `form-data`
 	file, handler, err := r.FormFile("trackFile")
 	if err != nil {
 		log.Printf("error retrieving the file: %v", err)
@@ -57,7 +50,6 @@ func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
 	}
 	trackLink := "http://localhost:8080/uploads/tracks/" + filepath.Base(trackPath)
 
-	// Извлечение остальных данных трека из формы
 	var newTrack entities.Track
 	newTrack.Duration, err = strconv.Atoi(r.FormValue("duration"))
 	newTrack.Title = r.FormValue("title")
@@ -72,16 +64,10 @@ func (h *TrackHandler) CreateTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Успешный ответ
 	json.NewEncoder(w).Encode(map[string]string{"message": "track created successfully", "track_link": trackLink})
 }
 
 func (h *TrackHandler) DeleteTrackByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	trackID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get track id from route: %v", err)
@@ -111,11 +97,6 @@ func (h *TrackHandler) DeleteTrackByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TrackHandler) GetTrackByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	trackID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get track id from route: %v", err)
@@ -135,11 +116,6 @@ func (h *TrackHandler) GetTrackByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TrackHandler) GetAllTracks(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	tracks, err := h.usecase.GetAllTracks()
 	if err != nil {
 		log.Printf("cant get tracks: %v", err)
@@ -152,11 +128,6 @@ func (h *TrackHandler) GetAllTracks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TrackHandler) LikeTrack(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("unauthorized: %v", err)
@@ -195,11 +166,6 @@ func (h *TrackHandler) LikeTrack(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TrackHandler) GetRandomTrack(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	track, err := h.usecase.GetRandomTrack()
 	if err != nil {
 		log.Printf("error retrieving random track: %v", err)
@@ -215,11 +181,6 @@ func (h *TrackHandler) GetRandomTrack(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TrackHandler) GetTrackByAuthorID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	authorID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)
@@ -239,11 +200,6 @@ func (h *TrackHandler) GetTrackByAuthorID(w http.ResponseWriter, r *http.Request
 }
 
 func (h *TrackHandler) GetTrackByGenreID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	genreID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)
@@ -263,11 +219,6 @@ func (h *TrackHandler) GetTrackByGenreID(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *TrackHandler) GetTracksByPlaylistID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	playlistID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)
@@ -287,11 +238,6 @@ func (h *TrackHandler) GetTracksByPlaylistID(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *TrackHandler) GetTracksByAlbumID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	albumID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)

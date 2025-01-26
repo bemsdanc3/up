@@ -19,11 +19,6 @@ func NewAlbumHandler(usecase usecase.AlbumUsecase) *AlbumHandler {
 }
 
 func (h *AlbumHandler) CreateAlbum(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Парсинг формы для обработки файлов
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		log.Printf("error parsing multipart form: %v", err)
@@ -80,11 +75,6 @@ func (h *AlbumHandler) CreateAlbum(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AlbumHandler) DeleteAlbumByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	albumID, err := getIDFromRouter(r)
 	if err != nil {
 		http.Error(w, "invalid id in route", http.StatusBadRequest)
@@ -101,11 +91,6 @@ func (h *AlbumHandler) DeleteAlbumByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AlbumHandler) EditAlbumByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	albumID, err := getIDFromRouter(r)
 	if err != nil {
 		http.Error(w, "invalid id in route", http.StatusBadRequest)
@@ -128,11 +113,6 @@ func (h *AlbumHandler) EditAlbumByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AlbumHandler) GetAlbumByAuthorID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	authorID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)
@@ -152,11 +132,6 @@ func (h *AlbumHandler) GetAlbumByAuthorID(w http.ResponseWriter, r *http.Request
 }
 
 func (h *AlbumHandler) GetAlbumByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	albumID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)

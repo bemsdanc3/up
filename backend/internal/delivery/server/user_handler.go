@@ -35,10 +35,9 @@ func NewUserHandler(usecase usecase.UserUseCase, playlistUsecase usecase.Playlis
 }
 
 func generateTokens(user entities.User) (accessToken, refreshToken string, err error) {
-	// Генерация access-токена (жизнь короткая, например, 1 час)
 	accessClaims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour).Unix(), // 1 час
+		"exp":     time.Now().Add(time.Hour).Unix(),
 	}
 	accessJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	accessToken, err = accessJWT.SignedString(jwtSecret)
@@ -46,10 +45,9 @@ func generateTokens(user entities.User) (accessToken, refreshToken string, err e
 		return "", "", err
 	}
 
-	// Генерация refresh-токена (жизнь долгая, например, 7 дней)
 	refreshClaims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), // 7 дней
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}
 	refreshJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
 	refreshToken, err = refreshJWT.SignedString(jwtSecret)
@@ -92,12 +90,10 @@ func getIDFromRouter(r *http.Request) (int, error) {
 }
 
 func ValidatePassword(password string) error {
-	// Проверяем длину пароля
 	if len(password) < 4 || len(password) > 16 {
 		return errors.New("password must be between 4 and 16 characters")
 	}
 
-	// Проверяем наличие запрещенных символов
 	forbiddenSymbols := "*&{}|+"
 	for _, char := range password {
 		if strings.ContainsRune(forbiddenSymbols, char) {
@@ -105,7 +101,6 @@ func ValidatePassword(password string) error {
 		}
 	}
 
-	// Проверяем наличие заглавных букв и цифр
 	var hasUpper, hasDigit bool
 	for _, char := range password {
 		if unicode.IsUpper(char) {
@@ -128,27 +123,19 @@ func ValidatePassword(password string) error {
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "wrong method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var newUser entities.User
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
-	// Установить стандартное значение аватарки
 	newUser.PFP = "http://localhost:8080/uploads/users-pfp/frog.jpg"
 
-	// Проверка пароля
 	if err := ValidatePassword(newUser.Pass); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Создание пользователя
 	if err := h.usecase.CreateUser(&newUser); err != nil {
 		if err.Error() == "email is already in use" {
 			http.Error(w, "email is already in use", http.StatusBadRequest)
@@ -161,7 +148,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Создание плейлиста для любимых треков
 	favoritePlaylist := &entities.Playlist{
 		Title:       "Любимые треки",
 		AuthorID:    newUser.ID,
@@ -173,7 +159,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error creating favorite playlist: %v", err)
 	}
 
-	// Генерация токенов
 	token, refreshToken, err := generateTokens(newUser)
 	if err != nil {
 		log.Printf("Error generating token: %v", err)
@@ -216,11 +201,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "wrong method", http.StatusBadRequest)
-		return
-	}
-
 	var input entities.User
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		log.Printf("Erorr decoding request body: %v", err)
@@ -236,7 +216,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Pass), []byte(input.Pass)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Pass), []byte(input.Pass)); err != nil {
 		log.Printf("Password missmatch for user: %s", input.Email)
 		log.Printf("stored hash: %s, Input password: %s", user.Pass, input.Pass)
 		http.Error(w, "Invalid user", http.StatusUnauthorized)
@@ -288,11 +268,6 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUserDetailsByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "wrong method", http.StatusBadRequest)
-		return
-	}
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("error getting user id from cookie: %v", err)
@@ -312,11 +287,6 @@ func (h *UserHandler) GetUserDetailsByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, "method not allowed", http.StatusBadRequest)
-		return
-	}
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("Cant get user ID from cookie: %v", err)
@@ -345,7 +315,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "failed to upload cover", http.StatusInternalServerError)
 		return
 	}
-	// Генерация URL для обложки
+
 	pfpLink := "http://localhost:8080/uploads/users-pfp/" + filepath.Base(coverPath)
 
 	var updatedUser entities.User
@@ -365,11 +335,6 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *UserHandler) GetUserProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("cant get user ID from cookie: %v", err)
@@ -475,11 +440,6 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	users, err := h.usecase.GetAllUsers()
 	if err != nil {
 		log.Printf("error getting users: %v", err)
@@ -492,11 +452,6 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var requestBody struct {
 		Role   string `json:"role,omitempty"`
 		UserID int    `json:"user_id,omitempty"`
