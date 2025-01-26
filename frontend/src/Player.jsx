@@ -176,7 +176,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
 
   const trackLike = async (trackId) => {
     try {
-      const loginRes = await fetch(`http://localhost:8080/login`,{
+      const loginRes = await fetch(`http://localhost:8080/tracks/like`,{
         method: 'POST',
         credentials: 'include',
         withCredentials: true,

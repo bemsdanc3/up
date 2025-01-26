@@ -18,6 +18,7 @@ type PlaylistRepository interface {
 	GetFavoritePlaylist(userID int) (*entities.Playlist, error)
 	AddTrackToFavorite(playlistID, trackID int) error
 	GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error)
+	IsTrackInPlaylist(playlistID, trackID int) (bool, error)
 }
 
 type playlistRepository struct {
@@ -222,4 +223,15 @@ func (r *playlistRepository) GetAllPlaylistsByAuthorID(authorID int) ([]entities
 		playlists = append(playlists, playlist)
 	}
 	return playlists, err
+}
+
+func (r *playlistRepository) IsTrackInPlaylist(playlistID, trackID int) (bool, error) {
+	query := `SELECT EXISTS (SELECT 1 FROM playlist_tracks WHERE playlist_id = $1 AND track_id = $2)`
+	var exists bool
+	err := r.db.QueryRow(query, playlistID, trackID).Scan(&exists)
+	if err != nil {
+		log.Printf("error checking if track exists in playlist: %v", err)
+		return false, err
+	}
+	return exists, nil
 }
