@@ -273,6 +273,17 @@ header #headerRight {
   max-height: 40px;
 }
 
+input {
+  background-color: var(--inputs-color);
+  border: none;
+  outline: none;
+  padding: 5px;
+  margin: 5px;
+  border-radius: 5px;
+  display: flex;
+  color: var(--text-color);
+}
+
 button {
   padding: 5px 10px;
   margin: 5px;
@@ -438,4 +449,69 @@ button:hover {
   flex-direction: column;
   height: calc(100vh - 170px);
   overflow-y: scroll;
+}
+
+#groupAdd {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.384);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#groupAddWin {
+  background-color: var(--panels-color);
+  padding: 15px 20px;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+#groupAddWin input {
+  width: 100%;
+}
+
+#groupAddWin select {
+  min-width: calc(100% + 10px);
+  margin:  5px;
+}
+
+#groupAddTitleAndClose {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+#selectedTracksGroup button {
+  padding: 10px;
+}
+
+select {
+  background-color: var(--inputs-color);
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-family: "Raleway", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+select option {
+  font-family: "Raleway", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.trackRightInfo {
+  display: flex;
+  align-items: center;
 }
