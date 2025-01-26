@@ -56,7 +56,6 @@ func (u *playlistUseCase) GetFavoritePlaylist(userID int) (*entities.Playlist, e
 func (u *playlistUseCase) AddTrackToFavorite(playlistID, trackID int) error {
 	return u.repo.AddTrackToFavorite(playlistID, trackID)
 }
-
 func (u *playlistUseCase) GetAllPlaylistsByAuthorID(authorID int) ([]entities.Playlist, error) {
 	return u.repo.GetAllPlaylistsByAuthorID(authorID)
 }

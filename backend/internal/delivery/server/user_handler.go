@@ -171,7 +171,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := newUser.ID
+	//userId := newUser.ID
 
 	http.SetCookie(w, &http.Cookie{ // токен в куки
 		Name:     "token",
@@ -205,7 +205,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "user created successfully",
 		"role":    "user",
-		"user_id": userId,
+		"user_id": strconv.Itoa(newUser.ID),
 	})
 }
 

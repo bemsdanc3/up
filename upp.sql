@@ -3,7 +3,8 @@ create table users (
                        login varchar(255) not null,
                        pass varchar(255) not null,
                        email varchar(255) not null,
-                       role varchar(255),
+                       role varchar(255) default 'user',
+                       creation_date timestamp default current_timestamp,
                        pfp varchar(255)
 );
 
@@ -29,7 +30,7 @@ create table tracks (
                         album_id int references albums(id) on delete cascade,
                         genre_id int references genre(id) on delete cascade,
                         tracklink varchar(255),
-                        listen_count int
+                        listen_count int default 0
 );
 
 create table playlists (
@@ -38,8 +39,8 @@ create table playlists (
                            creation_date timestamp default current_timestamp,
                            author_id int references users(id) on delete cascade,
                            cover varchar(255),
-                           description text,
-                           isPublic bool
+                           description text default 'Описание вашего плейлиста',
+                           isPublic bool default false
 );
 
 create table playlist_tracks (
