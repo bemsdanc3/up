@@ -258,12 +258,13 @@ header #headerRight {
   align-items: center;
 }
 
-.track .trackDurationInfo {
+#homePage .track .trackRightInfo {
   width: 33%;
   display: flex;
   justify-content: right;
   align-items: center;
   padding: 10px;
+  gap: 10px;
 }
 
 .track img {

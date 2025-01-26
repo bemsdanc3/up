@@ -14,7 +14,7 @@ function AddWin({ groupAdded, trackAdded, addInfo, close }) {
         const formdata = new FormData();
         formdata.append('cover', file);
         formdata.append('title', title);
-        if (addInfo == 'album') {
+        if (addInfo.type == 'album') {
             link = `/album/create`
             formdata.append('type_of', 'type_of будет тут');
             formdata.append('label', 'label будет тут');
@@ -100,7 +100,7 @@ function AddWin({ groupAdded, trackAdded, addInfo, close }) {
                 </div>
                 <input id='groupImgInput' type="file" placeholder='Выберите файл' onChange={(e)=>{setFile(e.target.files[0])}}/>
                 <input id='groupTitleInput' type="text" placeholder='Введите название' onChange={(e)=>setTitle(e.target.value)}/>
-                {addInfo.type == 'album' || addInfo.type == 'playlist' &&
+                {(addInfo.type == 'album' || addInfo.type == 'playlist') &&
                   <button type='button' onClick={()=>groupCrate()}>Создать</button>
                 }
                 {addInfo.type == 'track' &&
