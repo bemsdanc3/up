@@ -49,6 +49,9 @@ function App() {
   const playWave = () => {
     setIsWavePlaying(!isWavePlaying); // Переключаем состояние волны
     setTrack(null); // Сбрасываем текущий трек
+    setInterval(() => {
+      setIsWavePlaying(false);
+    }, 0);
   };
   
   const playTrack = (newTrack, groupInfo) => {
@@ -57,6 +60,10 @@ function App() {
     if (groupInfo) {
       setGroupInfo(groupInfo);
     }
+    setInterval(() => {
+      setTrack();
+      setGroupInfo();
+    }, 0);
   };   
 
   const playlistFunc = (id) => {
