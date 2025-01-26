@@ -557,3 +557,8 @@ select option {
 img {
   object-fit: cover;
 }
+
+.trackDurationInfo {
+  display: flex;
+  align-items: center;
+}
