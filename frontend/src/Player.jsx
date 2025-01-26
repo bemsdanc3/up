@@ -120,7 +120,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   useEffect(() => {
     if (track) {
       if (groupInfo) {
-        setPlayingTrackInfo({ ...track, author_id: groupInfo.author_id, author_login: groupInfo.authorLogin, cover: track.cover || groupInfo.cover });
+        setPlayingTrackInfo({ ...track, author_id: groupInfo.author_id, author_login: track.author_login || groupInfo.authorLogin, cover: track.cover || groupInfo.cover });
         isTrackLikedFunc(track.id);
       } else {
         setPlayingTrackInfo(track);
@@ -238,17 +238,17 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   return (
     <div id="player">
       <div id="trackinfo">
-        {trackLoaded && playingTrackInfo &&
+        {playingTrackInfo &&
           <>
-            <img src={playingTrackInfo.cover} alt="" />
+            {playingTrackInfo.cover && <img src={playingTrackInfo.cover} alt="" />}
             <div id="trackTextInfo">
-              <span id="tracktitle">{playingTrackInfo.title}</span>
+              {playingTrackInfo.title && <span id="tracktitle">{playingTrackInfo.title}</span>}
               <span id="trackauthor" onClick={()=>{userProfile(playingTrackInfo.author_id)}}>{playingTrackInfo.author_login}</span>
             </div>
-            {isTrackLiked && 
+            {isTrackLiked && playingTrackInfo.title && 
               <HeartFilledIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
           }
-            {!isTrackLiked && 
+            {!isTrackLiked && playingTrackInfo.title && 
               <HeartIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
             }
           </>

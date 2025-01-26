@@ -71,7 +71,7 @@ function Tracks({ handleTrackClick}) {
                     </div>
                     </div>
                     <div className="trackAlbumInfo">
-                    <span> AlbumTitle </span>
+                    <span> {track.album_title} </span>
                     </div>
                     <div className="trackDurationInfo">
                     <span>
