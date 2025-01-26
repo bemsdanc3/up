@@ -6,12 +6,14 @@ import PauseIcon from './assets/PauseIcon.svg?react';
 import VolumeIcon from './assets/VolumeIcon.svg?react';
 import VolumeOffIcon from './assets/VolumeOffIcon.svg?react';
 import HeartIcon from './assets/HeartIcon.svg?react';
+import HeartFilledIcon from './assets/HeartFilledIcon.svg?react';
 
 function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isTrackLiked, setIsTrackLiked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [trackLoaded, setTrackLoaded] = useState(false);
   const [volume, setVolume] = useState(1); // volume from 0 to 1
@@ -74,9 +76,36 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
       getRandomTrack();
     }
   };
+
+  const isTrackLikedFunc = async (trackid) => {
+    const response = await fetch('http://localhost:8080/playlists/track/check', {
+      method: 'POST',
+      credentials: 'include',
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify({
+        track_id: trackid
+      })
+    })
+    if (response.ok) {
+      const responseData = await response.json();
+      if (responseData.is_in_playlist == true) {
+        setIsTrackLiked(true);
+        console.log('track liked')
+      } else {
+        setIsTrackLiked(false);
+        console.log('track not liked')
+      }
+    } else {
+      console.log('жопа');
+    }
+  }
   
   useEffect(() => {
     console.log(playingTrackInfo.track_link);
+    isTrackLikedFunc(playingTrackInfo.id);
 
     if (audioRef.current && playingTrackInfo.track_link) {
       audioRef.current.src = playingTrackInfo.track_link;
@@ -91,7 +120,8 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   useEffect(() => {
     if (track) {
       if (groupInfo) {
-        setPlayingTrackInfo({ ...track, author_login: groupInfo.authorLogin, cover: groupInfo.cover });
+        setPlayingTrackInfo({ ...track, author_id: groupInfo.author_id, author_login: groupInfo.authorLogin, cover: track.cover || groupInfo.cover });
+        isTrackLikedFunc(track.id);
       } else {
         setPlayingTrackInfo(track);
       }
@@ -99,7 +129,9 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   }, [track]);
 
   useEffect(()=>{
-    getRandomTrack();
+    if (isWavePlaying) {
+      getRandomTrack();
+    }
   }, [isWavePlaying])
 
   // Функция для изменения громкости
@@ -132,6 +164,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
       setIsPlaying(true);
       setPlayingTrackInfo(responseData);
       setTrackLoaded(true);
+      isTrackLikedFunc();
     } else {
       console.log('жопа');
     }
@@ -192,6 +225,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
       console.log(responseData);
       if (loginRes.ok) {
         console.log("salamalekum")
+        isTrackLikedFunc(playingTrackInfo.id);
       } else {
         const errorData = await loginRes.json();
         console.log(errorData.error);
@@ -211,7 +245,12 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
               <span id="tracktitle">{playingTrackInfo.title}</span>
               <span id="trackauthor" onClick={()=>{userProfile(playingTrackInfo.author_id)}}>{playingTrackInfo.author_login}</span>
             </div>
-            <HeartIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
+            {isTrackLiked && 
+              <HeartFilledIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
+          }
+            {!isTrackLiked && 
+              <HeartIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
+            }
           </>
         }
       </div>

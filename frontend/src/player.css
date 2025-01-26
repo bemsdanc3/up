@@ -23,6 +23,7 @@
     height: 40px;
     background-color: var(--inputs-color);
     margin-right: 10px;
+    border-radius: 5px;
 }
 
 #trackTextInfo {

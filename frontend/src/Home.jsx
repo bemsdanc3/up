@@ -192,6 +192,45 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
     }
   }
 
+  const groupDelete = async () => {
+    try {
+      let link;
+      let body;
+      if (selectedAlbum) {
+        link = `/album/delete/${selectedAlbum}`;
+      } else {
+        link = `/playlists/delete`;
+        body = {
+          playlist_id: selectedPlaylist,
+        }
+      }
+      const groupDelRes = await fetch(`http://localhost:8080${link}`,{
+        method: 'DELETE',
+        credentials: 'include',
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify(body),
+      });
+      const responseData = await groupDelRes.json();
+      console.log("responseData");
+      console.log(responseData);
+      if (groupDelRes.ok) {
+        console.log("group deleted");
+        setSelectedAlbum();
+        setSelectedPlaylist();
+        getAllAlbums();
+        getAllPlaylists();
+      } else {
+        const errorData = await groupDelRes.json();
+        console.log(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
       {isAddWin && 
@@ -320,6 +359,9 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
               <div id="selectedGroupTextInfo">
                 <h2>{selectedGroupInfo.title}</h2>
                 <h2>{selectedGroupInfo.authorLogin}</h2>
+                {selectedGroupInfo.title != 'Любимые треки' && selectedGroupInfo.author_id == loginData.user_id && 
+                <button onClick={()=>{groupDelete()}}>X Удалить</button>
+                } 
               </div>
             </div>
             <div id='selectedTracksGroup'>
@@ -337,11 +379,14 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
                   return (
                     <div className="track" key={track.id} onClick={()=>{handleTrackClick(track, selectedGroupInfo)}}>
                       <div className="trackLeftInfo">
+                        {selectedPlaylist && 
+                        <img src={track.cover} alt="" />
+                        }
                         {track.title}
                       </div>
                       <div className="trackRightInfo">
                         {formatDuration(track.duration)}
-                        {selectedGroupInfo.author_id == loginData.user_id &&
+                        {selectedGroupInfo.author_id == loginData.user_id && !selectedPlaylist &&
                           <button onClick={(e)=>{e.preventDefault(); trackDelete(track.id)}}>
                             Удалить
                           </button>

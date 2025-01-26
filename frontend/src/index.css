@@ -212,6 +212,7 @@ header #headerRight {
 .playlist img, .album img {
   width: 50px;
   height: 50px;
+  border-radius: 5px;
 }
 
 .playlistTextInfo {
@@ -242,6 +243,12 @@ header #headerRight {
 .track .trackLeftInfo {
   display: flex;
   width: 33%;
+  align-items: center;
+}
+
+.track .trackLeftInfo img {
+  margin-right: 5px;
+  border-radius: 5px;
 }
 
 .track .trackTextInfo {
@@ -430,6 +437,7 @@ button:hover {
   width: 200px;
   height: 200px;
   background-color: var(--inputs-color);
+  border-radius: 5px;
 }
 
 #profilePage #userAlbums {
@@ -515,4 +523,37 @@ select option {
 .trackRightInfo {
   display: flex;
   align-items: center;
+}
+
+#userAdminBtns {
+  display: flex;
+}
+
+#userAdminBtns button.selected {
+  outline: 2px solid var(--inputs-brighter-hover-color);
+}
+
+#searchUsersDiv {
+  display: flex;
+  align-items: center;
+}
+
+#regErr {
+  height: 20px;
+  color: rgb(219, 24, 105);
+  background-color: rgba(255, 0, 0, 0.103);
+  display: flex;
+  align-items: center;
+}
+
+.visible {
+  visibility: visible;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+img {
+  object-fit: cover;
 }

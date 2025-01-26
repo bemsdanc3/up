@@ -49,6 +49,9 @@ function App() {
   const playWave = () => {
     setIsWavePlaying(!isWavePlaying); // Переключаем состояние волны
     setTrack(null); // Сбрасываем текущий трек
+    setInterval(() => {
+      setIsWavePlaying(false);
+    }, 0);
   };
   
   const playTrack = (newTrack, groupInfo) => {
@@ -57,6 +60,10 @@ function App() {
     if (groupInfo) {
       setGroupInfo(groupInfo);
     }
+    setInterval(() => {
+      setTrack();
+      setGroupInfo();
+    }, 0);
   };   
 
   const playlistFunc = (id) => {
@@ -77,8 +84,7 @@ function App() {
     <>
       {!logged && 
         <LoginForm 
-          logFunc={() => setLogged(true)} 
-          loginData={(data)=>{setLoginData(data); console.log(loginData)}}
+          loginData={(data)=>{setLogged(true); setLoginData(data); console.log(loginData)}}
         />
       }
       {logged && 
