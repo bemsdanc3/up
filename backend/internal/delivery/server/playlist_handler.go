@@ -251,10 +251,6 @@ func (h *PlaylistHandler) GetAllPlaylistsByAuthorID(w http.ResponseWriter, r *ht
 }
 
 func (h *TrackHandler) IsTrackInPlaylist(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
