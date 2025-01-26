@@ -180,9 +180,14 @@ func (h *TrackHandler) LikeTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.playlistUsecase.AddTrackToFavorite(favoritePlaylist.ID, requestBody.TrackID); err != nil {
-		log.Printf("error adding track to favorite playlist: %v", err)
-		http.Error(w, "server error", http.StatusInternalServerError)
+	err = h.playlistUsecase.AddTrackToFavorite(favoritePlaylist.ID, requestBody.TrackID)
+	if err != nil {
+		if err.Error() == "track already in favorite playlist" {
+			http.Error(w, "track already in favorite playlist", http.StatusConflict)
+		} else {
+			log.Printf("error adding track to favorite playlist: %v", err)
+			http.Error(w, "server error", http.StatusInternalServerError)
+		}
 		return
 	}
 	json.NewEncoder(w).Encode(map[string]string{"message": "track liked successfully"})
