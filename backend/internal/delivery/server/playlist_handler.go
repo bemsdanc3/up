@@ -23,11 +23,6 @@ func NewPlaylistHandler(useCase usecase.PlaylistUseCase) *PlaylistHandler {
 }
 
 func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	}
-
-	// Ограничение на размер файла (например, 10MB)
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		log.Printf("error parsing form: %v", err)
@@ -35,7 +30,6 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Получение файла из `form-data`
 	file, handler, err := r.FormFile("cover")
 	if err != nil {
 		log.Printf("error retrieving the file: %v", err)
@@ -65,7 +59,7 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 	newPlaylist.Description = r.FormValue("description")
 	newPlaylist.AuthorID = authorID
 	isPublicStr := r.FormValue("is_public")
-	isPublic := false // Значение по умолчанию
+	isPublic := false
 
 	if isPublicStr == "true" {
 		isPublic = true
@@ -84,10 +78,6 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *PlaylistHandler) GetPlaylistByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	}
-
 	playlistID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("invalid playlist id: %v", err)
@@ -112,11 +102,6 @@ func (h *PlaylistHandler) GetPlaylistByID(w http.ResponseWriter, r *http.Request
 
 // ПОФИКСИТЬ ЧТОБЫ ПОЛЬЗОВАТЕЛИ МОГЛИ УДАЛЯТЬ ТОЛЬКО СВОИ ПЛЕЙЛИСТЫ
 func (h *PlaylistHandler) DeletePlaylistByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var requestBody RequestBody
 
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -141,11 +126,6 @@ func (h *PlaylistHandler) DeletePlaylistByID(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *PlaylistHandler) EditPlaylistByID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var updatedPlaylist entities.Playlist
 	if err := json.NewDecoder(r.Body).Decode(&updatedPlaylist); err != nil {
 		log.Printf("error fetching playlist: %v", err)
@@ -171,11 +151,6 @@ func (h *PlaylistHandler) EditPlaylistByID(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *PlaylistHandler) GetAllPlaylistsByUserID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("Error extracting userID: %v", err)
@@ -196,11 +171,6 @@ func (h *PlaylistHandler) GetAllPlaylistsByUserID(w http.ResponseWriter, r *http
 }
 
 func (h *PlaylistHandler) AddTrackToPlaylist(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var requestBody struct {
 		PlaylistID int `json:"playlist_id,omitempty"`
 		TrackID    int `json:"track_id,omitempty"`
@@ -227,11 +197,6 @@ func (h *PlaylistHandler) AddTrackToPlaylist(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *PlaylistHandler) GetAllPlaylistsByAuthorID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	authorID, err := getIDFromRouter(r)
 	if err != nil {
 		log.Printf("Error getting ID from route: %v", err)
@@ -251,7 +216,6 @@ func (h *PlaylistHandler) GetAllPlaylistsByAuthorID(w http.ResponseWriter, r *ht
 }
 
 func (h *TrackHandler) IsTrackInPlaylist(w http.ResponseWriter, r *http.Request) {
-
 	userID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("unauthorized: %v", err)
