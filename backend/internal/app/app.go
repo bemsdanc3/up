@@ -60,6 +60,7 @@ func Run() {
 	authRouter.HandleFunc("/playlists/my/all", playlistHandler.GetAllPlaylistsByUserID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/playlists/add/track", playlistHandler.AddTrackToPlaylist).Methods(http.MethodPost)
 	authRouter.HandleFunc("/playlists/all/{id}", playlistHandler.GetAllPlaylistsByAuthorID).Methods(http.MethodGet)
+	authRouter.HandleFunc("/playlists/track/check", trackHandler.IsTrackInPlaylist).Methods(http.MethodGet)
 
 	//запросы с треками
 	authRouter.HandleFunc("/tracks/create", trackHandler.CreateTrack).Methods(http.MethodPost)

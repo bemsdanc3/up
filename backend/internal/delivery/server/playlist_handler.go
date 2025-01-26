@@ -52,7 +52,7 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	playlistCoverLink := "http://localhost:8080/uploads/cover-playlist/" + filepath.Base(playlistCoverPath)
-	
+
 	authorID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("error retrieving user ID: %v", err)
@@ -248,4 +248,43 @@ func (h *PlaylistHandler) GetAllPlaylistsByAuthorID(w http.ResponseWriter, r *ht
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(playlists)
+}
+
+func (h *TrackHandler) IsTrackInPlaylist(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, err := getUserIDFromCookie(r)
+	if err != nil {
+		log.Printf("unauthorized: %v", err)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var requestBody struct {
+		TrackID int `json:"track_id"`
+	}
+	if err = json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Printf("error reading request body: %v", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
+	favoritePlaylist, err := h.playlistUsecase.GetFavoritePlaylist(userID)
+	if err != nil {
+		log.Printf("error getting favorite playlist: %v", err)
+		http.Error(w, "error fetching favorite playlist", http.StatusBadRequest)
+		return
+	}
+
+	isInPlaylist, err := h.playlistUsecase.IsTrackInPlaylist(favoritePlaylist.ID, requestBody.TrackID)
+	if err != nil {
+		log.Printf("error checking if track is in playlist: %v", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]bool{"is_in_playlist": isInPlaylist})
 }
