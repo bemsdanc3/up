@@ -93,3 +93,12 @@
 #playercontrols {
     display: flex;
 }
+
+#player #trackinfo svg {
+    opacity: 0.5;
+    margin: 0 20px;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+    }
+  }

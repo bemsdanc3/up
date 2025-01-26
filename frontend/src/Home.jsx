@@ -3,6 +3,7 @@ import PlusIcon from './assets/PlusIcon.svg?react';
 import PlayIcon from './assets/PlayIcon.svg?react';
 import PauseIcon from './assets/PauseIcon.svg?react';
 import AddWin from './AddWin.jsx';
+import HeartIcon from './assets/HeartIcon.svg?react';
 
 function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
   const [tracks, setTracks] = useState([])
@@ -218,7 +219,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
               <button
                 onClick={()=>{
                   setIsAddWin(true);
-                  setAddType('album')
+                  setAddType('album');
                 }}
               >
                 <PlusIcon />
@@ -299,7 +300,8 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
                     <div className="trackAlbumInfo">
                       <span>{track.album_title}</span>
                     </div>
-                    <div className="trackDurationInfo">
+                    <div className="trackRightInfo">
+                      {/* <HeartIcon /> */}
                       <span>
                         {formatDuration(track.duration)}
                       </span>

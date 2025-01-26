@@ -5,6 +5,7 @@ import NextIcon from './assets/NextIcon.svg?react';
 import PauseIcon from './assets/PauseIcon.svg?react';
 import VolumeIcon from './assets/VolumeIcon.svg?react';
 import VolumeOffIcon from './assets/VolumeOffIcon.svg?react';
+import HeartIcon from './assets/HeartIcon.svg?react';
 
 function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   const audioRef = useRef(null);
@@ -173,6 +174,33 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
     };
   }, [getRandomTrack]);  
 
+  const trackLike = async (trackId) => {
+    try {
+      const loginRes = await fetch(`http://localhost:8080/login`,{
+        method: 'POST',
+        credentials: 'include',
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({
+          track_id: trackId,
+        }),
+      });
+      const responseData = await loginRes.json();
+      console.log("responseData");
+      console.log(responseData);
+      if (loginRes.ok) {
+        console.log("salamalekum")
+      } else {
+        const errorData = await loginRes.json();
+        console.log(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }   
+
   return (
     <div id="player">
       <div id="trackinfo">
@@ -183,6 +211,7 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
               <span id="tracktitle">{playingTrackInfo.title}</span>
               <span id="trackauthor" onClick={()=>{userProfile(playingTrackInfo.author_id)}}>{playingTrackInfo.author_login}</span>
             </div>
+            <HeartIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
           </>
         }
       </div>
