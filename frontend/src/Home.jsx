@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PlusIcon from './assets/PlusIcon.svg?react';
 import PlayIcon from './assets/PlayIcon.svg?react';
 import PauseIcon from './assets/PauseIcon.svg?react';
+import AddWin from './AddWin.jsx';
 
 function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
   const [tracks, setTracks] = useState([])
@@ -9,6 +10,8 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
   const [playlists, setPlaylists] = useState([])
   const [albums, setAlbums] = useState([])
   const [playlistsLoaded, setPlaylistsLoaded] = useState(false)
+  const [isAddWin, setIsAddWin] = useState(false)
+  const [addType, setAddType] = useState('')
   const [albumsLoaded, setAlbumsLoaded] = useState(false)
   const [selectedAlbum, setSelectedAlbum] = useState();
   const [selectedPlaylist, setSelectedPlaylist] = useState();
@@ -166,136 +169,190 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
     trackPlay(track, groupInfo);
   };  
 
+  const trackDelete = async (trackid) => {
+    try {
+      const trackDelRes = await fetch(`http://localhost:8080/tracks/delete/${trackid}`,{
+        method: 'DELETE',
+        credentials: 'include',
+        withCredentials: true,
+      });
+      const responseData = await trackDelRes.json();
+      console.log("responseData");
+      console.log(responseData);
+      if (trackDelRes.ok) {
+        console.log("track deleted");
+        getGroupInfo(selectedAlbum || selectedPlaylist, selectedAlbum ? 'album' : 'playlist')
+      } else {
+        const errorData = await loginRes.json();
+        console.log(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
-        <div id="homePage">
-          <div id="myMedia">
-              <h2>Моя медиатека</h2>
-              <div id="createBtns">
-                <button>
-                  <PlusIcon />
-                  Новый плейлист
-                </button>
-                {loginData.role == 'artist' &&
-                <button>
-                  <PlusIcon />
-                  Новый Альбом
-                </button>
-                }
-              </div>
-            <div id="myPlaylists">
-            {albums && albums.length >=1 &&
-              <>
-              <h2>Мои альбомы: </h2>
-              {albums.map((album)=>{
-                return (
-                  <>
-                  <div className="album" onClick={()=>{getGroupInfo(album.id, 'album')}}>
-                    <img src={album.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{album.title}</span>
-                    </div>
-                  </div>
-                  </>
-                )
-              })}
-              </>
-            }
+      {isAddWin && 
+        <AddWin 
+          groupAdded={()=>{setIsAddWin(false); getAllAlbums(); getAllPlaylists()}}  
+          addInfo={{type: addType, groupId: selectedAlbum || selectedPlaylist}}
+          close={()=>setIsAddWin(false)}
+          trackAdded={()=>{setIsAddWin(false); getGroupInfo(selectedAlbum || selectedPlaylist, selectedAlbum ? 'album' : 'playlist')}}
+        /> 
+      }
+      <div id="homePage">
+        <div id="myMedia">
+            <h2>Моя медиатека</h2>
+            <div id="createBtns">
+              <button
+                onClick={()=>{
+                  setIsAddWin(true);
+                  setAddType('playlist')
+                }}
+                >
+                <PlusIcon />
+                Новый плейлист
+              </button>
+              {loginData.role == 'artist' &&
+              <button
+                onClick={()=>{
+                  setIsAddWin(true);
+                  setAddType('album')
+                }}
+              >
+                <PlusIcon />
+                Новый Альбом
+              </button>
+              }
             </div>
-            <div id="myPlaylists">
-            {playlists && playlists.length >=1 &&
-              <>
-              <h2>Мои плейлисты: </h2>
-              {playlists.map((playlist)=>{
-                return (
-                  <>
-                  <div className="playlist" onClick={()=>{getGroupInfo(playlist.id, 'playlist')}}>
-                    <img src={playlist.cover} alt="" />
-                    <div className="playlistTextInfo">
-                      <span>{playlist.title}</span>
-                    </div>
+          <div id="myPlaylists">
+          {albums && albums.length >=1 &&
+            <>
+            <h2>Мои альбомы: </h2>
+            {albums.map((album)=>{
+              return (
+                <>
+                <div className="album" onClick={()=>{getGroupInfo(album.id, 'album')}}>
+                  <img src={album.cover} alt="" />
+                  <div className="playlistTextInfo">
+                    <span>{album.title}</span>
                   </div>
-                  </>
-                )
-              })}
-              </>
-            }
+                </div>
+                </>
+              )
+            })}
+            </>
+          }
+          </div>
+          <div id="myPlaylists">
+          {playlists && playlists.length >=1 &&
+            <>
+            <h2>Мои плейлисты: </h2>
+            {playlists.map((playlist)=>{
+              return (
+                <>
+                <div className="playlist" onClick={()=>{getGroupInfo(playlist.id, 'playlist')}}>
+                  <img src={playlist.cover} alt="" />
+                  <div className="playlistTextInfo">
+                    <span>{playlist.title}</span>
+                  </div>
+                </div>
+                </>
+              )
+            })}
+            </>
+          }
+          </div>
+        </div>
+        {!selectedAlbum && !selectedPlaylist &&
+        <div id="homeRight">
+          <div id="myWave">
+            <button id="wavePlayBtn" onClick={()=>{handleWavePlay()}}>
+              {/* {!isWavePlaying ? <PlayIcon /> : <PauseIcon />} */}
+              <PlayIcon />
+              Играть
+            </button>
+            <div id="homeGenres">
+              <button id="RockGanre">Рок</button>
+              <button id="PopGanre">Поп</button>
+              <button id="MetalGanre">Метал</button>
+              <button id="ClassicalGanre">Классика</button>
+              <button id="HipHopGanre">Хип-Хоп</button>
+              {/* <button id="MusicForSexGanre">Music for sex</button> */}
             </div>
           </div>
-          {!selectedAlbum && !selectedPlaylist &&
-          <div id="homeRight">
-            <div id="myWave">
-              <button id="wavePlayBtn" onClick={()=>{handleWavePlay()}}>
-                {/* {!isWavePlaying ? <PlayIcon /> : <PauseIcon />} */}
-                <PlayIcon />
-                Играть
-              </button>
-              <div id="homeGenres">
-                <button id="RockGanre">Рок</button>
-                <button id="PopGanre">Поп</button>
-                <button id="MetalGanre">Метал</button>
-                <button id="ClassicalGanre">Классика</button>
-                <button id="HipHopGanre">Хип-Хоп</button>
-                {/* <button id="MusicForSexGanre">Music for sex</button> */}
+          <div id="allTracks">
+            {tracks && tracks.length >= 1 &&
+              tracks.map((track)=>{
+                return (
+                  <div className="track"
+                    onClick={()=>{handleTrackClick(track)}}
+                  >
+                    <div className="trackLeftInfo">
+                      <img src={track.cover} alt="" />
+                      <div className="trackTextInfo">
+                        <span>{track.title}</span>
+                        <span>{track.author_login}</span>
+                      </div>
+                    </div>
+                    <div className="trackAlbumInfo">
+                      <span>{track.album_title}</span>
+                    </div>
+                    <div className="trackDurationInfo">
+                      <span>
+                        {formatDuration(track.duration)}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })
+            } 
+          </div>
+        </div>
+        }
+        {(selectedAlbum || selectedPlaylist) &&
+        <div id="selectedGroup">
+            <div id='selectedGroupInfo'>
+              <img src={selectedGroupInfo.cover} alt="" />
+              <div id="selectedGroupTextInfo">
+                <h2>{selectedGroupInfo.title}</h2>
+                <h2>{selectedGroupInfo.authorLogin}</h2>
               </div>
             </div>
-            <div id="allTracks">
-              {tracks && tracks.length >= 1 &&
-                tracks.map((track)=>{
+            <div id='selectedTracksGroup'>
+              {selectedGroupInfo.title != 'Любимые треки' && selectedGroupInfo.author_id == loginData.user_id && selectedAlbum &&
+                <button onClick={()=>{
+                  setIsAddWin(true);
+                  setAddType('track');
+                }}>
+                  <PlusIcon />
+                  Добавить трек
+                </button>
+              }
+              {tracksGroup && tracksGroup.length >= 1 &&
+                tracksGroup.map((track)=>{
                   return (
-                    <div className="track"
-                      onClick={()=>{handleTrackClick(track)}}
-                    >
+                    <div className="track" key={track.id} onClick={()=>{handleTrackClick(track, selectedGroupInfo)}}>
                       <div className="trackLeftInfo">
-                        <img src={track.cover} alt="" />
-                        <div className="trackTextInfo">
-                          <span>{track.title}</span>
-                          <span>{track.author_login}</span>
-                        </div>
+                        {track.title}
                       </div>
-                      <div className="trackAlbumInfo">
-                        <span>{track.album_title}</span>
-                      </div>
-                      <div className="trackDurationInfo">
-                        <span>
-                          {formatDuration(track.duration)}
-                        </span>
+                      <div className="trackRightInfo">
+                        {formatDuration(track.duration)}
+                        {selectedGroupInfo.author_id == loginData.user_id &&
+                          <button onClick={(e)=>{e.preventDefault(); trackDelete(track.id)}}>
+                            Удалить
+                          </button>
+                        }
                       </div>
                     </div>
                   )
                 })
-              } 
+              }
             </div>
-          </div>
-          }
-          {(selectedAlbum || selectedPlaylist) &&
-          <div id="selectedGroup">
-              <div id='selectedGroupInfo'>
-                <img src={selectedGroupInfo.cover} alt="" />
-                <div id="selectedGroupTextInfo">
-                  <h2>{selectedGroupInfo.title}</h2>
-                  <h2>{selectedGroupInfo.authorLogin}</h2>
-                </div>
-              </div>
-              <div id='selectedTracksGroup'>
-                {tracksGroup && tracksGroup.length >= 1 &&
-                  tracksGroup.map((track)=>{
-                    return (
-                      <div className="track" key={track.id} onClick={()=>{handleTrackClick(track, selectedGroupInfo)}}>
-                        <div className="trackLeftInfo">
-                          {track.title}
-                        </div>
-                        <div className="trackRightInfo">
-                          {formatDuration(track.duration)}
-                        </div>
-                      </div>
-                    )
-                  })
-                }
-              </div>
-          </div>
-          }
         </div>
+        }
+      </div>
     </>
   )
 }
