@@ -53,7 +53,6 @@ func Run() {
 	authRouter.HandleFunc("/users/update-role", userHandler.UpdateRole).Methods(http.MethodPatch)
 
 	//запросы с плейлистами
-
 	authRouter.HandleFunc("/playlists/create", playlistHandler.CreatePlaylist).Methods(http.MethodPost)
 	authRouter.HandleFunc("/playlists/view/{id}", playlistHandler.GetPlaylistByID).Methods(http.MethodGet)
 	authRouter.HandleFunc("/playlists/delete", playlistHandler.DeletePlaylistByID).Methods(http.MethodDelete)

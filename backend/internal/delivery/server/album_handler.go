@@ -50,19 +50,18 @@ func (h *AlbumHandler) CreateAlbum(w http.ResponseWriter, r *http.Request) {
 	// Генерация URL для обложки
 	coverLink := "http://localhost:8080/uploads/covers-albums/" + filepath.Base(coverPath)
 
-	// Чтение остальных данных альбома из формы
-	var newAlbum entities.Album
-	newAlbum.Title = r.FormValue("title")
-	newAlbum.TypeOf = r.FormValue("type_of")
-	newAlbum.Label = r.FormValue("label")
-	newAlbum.Cover = coverLink // Установить путь к обложке
-
-	// Получение ID автора из cookie
 	authorID, err := getUserIDFromCookie(r)
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
+
+	// Чтение остальных данных альбома из формы
+	var newAlbum entities.Album
+	newAlbum.Title = r.FormValue("title")
+	newAlbum.TypeOf = r.FormValue("type_of")
+	newAlbum.Label = r.FormValue("label")
+	newAlbum.Cover = coverLink
 	newAlbum.AuthorID = authorID
 
 	// Создание альбома через usecase

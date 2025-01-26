@@ -8,7 +8,7 @@ type User struct {
 	Pass         string     `json:"pass,omitempty"`
 	Email        string     `json:"email,omitempty"`
 	Role         string     `json:"role,omitempty"`
-	PFP          *string    `json:"pfp,omitempty"`
+	PFP          string     `json:"pfp,omitempty"`
 	CreationDate *time.Time `json:"creationDate,omitempty"`
 }
 

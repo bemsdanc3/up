@@ -52,6 +52,7 @@ func (h *PlaylistHandler) CreatePlaylist(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	playlistCoverLink := "http://localhost:8080/uploads/cover-playlist/" + filepath.Base(playlistCoverPath)
+	
 	authorID, err := getUserIDFromCookie(r)
 	if err != nil {
 		log.Printf("error retrieving user ID: %v", err)
