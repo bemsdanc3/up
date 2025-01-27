@@ -33,6 +33,7 @@ func (r *userRepository) CreateUser(user *entities.User) error {
 	err := r.db.QueryRow(query, user.Login, user.Email, user.Pass, user.PFP).Scan(&user.ID)
 	if err != nil {
 		log.Printf("Error creating user: %v", err)
+		return err
 	}
 	return err
 }
