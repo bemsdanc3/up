@@ -67,28 +67,33 @@ function LoginForm({ loginData }) {
     try {
         const email = document.getElementById('emailInput')
         const password = document.getElementById('passwordInput')
-      const loginRes = await fetch(`http://localhost:8080/login`,{
-        method: 'POST',
-        credentials: 'include',
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json", 
-        },
-        body: JSON.stringify({
-          email: email.value,
-          pass: password.value,
-        }),
-      });
-      const responseData = await loginRes.json();
-      console.log("responseData");
-      console.log(responseData);
-      if (loginRes.ok) {
-        console.log("salamalekum")
-        loginData(responseData);
-      } else {
-        const errorData = await loginRes.json();
-        console.log(errorData.error);
-      }
+        if (email.value.length < 1 || password.value.length < 1) {
+          setErrText('Заполните все данные')
+        } else {
+          const loginRes = await fetch(`http://localhost:8080/login`,{
+            method: 'POST',
+            credentials: 'include',
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json", 
+            },
+            body: JSON.stringify({
+              email: email.value,
+              pass: password.value,
+            }),
+          });
+          const responseData = await loginRes.json();
+          console.log("responseData");
+          console.log(responseData);
+          if (loginRes.ok) {
+            console.log("salamalekum")
+            loginData(responseData);
+          } else {
+            const errorData = await loginRes.text();
+            console.log(errorData.error);
+            setErrText(errorData);
+          }
+        }
     } catch (error) {
       console.log(error);
     }
@@ -110,6 +115,7 @@ function LoginForm({ loginData }) {
       {isLogin &&
         <div id="registration">
         <h1>Авторизация</h1>
+        <span id='regErr' className={`${errText ? 'visible' : 'hidden'}`}>{errText}</span>
         <input id='emailInput' type="email" placeholder='Введите почту' />
         <input id='passwordInput' type="password" placeholder='Введите пароль' />
         <button type='button' onClick={()=>Login()}>Войти</button>

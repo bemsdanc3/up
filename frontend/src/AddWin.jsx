@@ -4,12 +4,18 @@ function AddWin({ groupAdded, trackAdded, addInfo, close }) {
   const [file, setFile] = useState();
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState(1);
+  const [errText, setErrText] = useState('');
 
     const groupCrate = async () => {
       try {
         if (title.length <= 0) {
+          setErrText('Введите название')
             return;
         } 
+        if (!file) {
+          setErrText('Загрузите файл обложки');
+          return
+        }
         let link;
         const formdata = new FormData();
         formdata.append('cover', file);
@@ -44,8 +50,13 @@ function AddWin({ groupAdded, trackAdded, addInfo, close }) {
 
     const trackAdd = async () => {
       try {
-        if (title.length <= 0 || !file) {
+        if (title.length <= 0) {
+          setErrText('Введите название')
           return;
+        }
+        if (!file) {
+          setErrText('Загрузите файл трека');
+          return
         }
     
         // Создаем временный URL для аудиофайла
@@ -98,6 +109,7 @@ function AddWin({ groupAdded, trackAdded, addInfo, close }) {
                     <h1>Создание {addInfo.type}</h1>
                     <button onClick={close}>X</button>
                 </div>
+                <span id='regErr' className={`${errText ? 'visible' : 'hidden'}`}>{errText}</span>
                 <input id='groupImgInput' type="file" placeholder='Выберите файл' onChange={(e)=>{setFile(e.target.files[0])}}/>
                 <input id='groupTitleInput' type="text" placeholder='Введите название' onChange={(e)=>setTitle(e.target.value)}/>
                 {(addInfo.type == 'album' || addInfo.type == 'playlist') &&
