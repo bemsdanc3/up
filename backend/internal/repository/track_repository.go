@@ -206,6 +206,7 @@ func (r *trackRepository) GetTrackByAuthorID(authorID int) ([]entities.Track, er
 			t.listen_count,
 			a.cover AS album_cover,  
 			u.login AS author_login
+			u.id AS author_id
 		FROM 
 			tracks t
 		LEFT JOIN 
@@ -235,6 +236,7 @@ func (r *trackRepository) GetTrackByAuthorID(authorID int) ([]entities.Track, er
 			&track.ListenCount,
 			&track.Cover,
 			&track.AuthorLogin,
+			&track.AuthorID,
 		); err != nil {
 			log.Printf("error scanning track rows: %v", err)
 			return nil, err

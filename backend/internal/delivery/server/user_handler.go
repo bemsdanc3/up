@@ -411,7 +411,11 @@ func (h *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Tokens refreshed successfully"})
+	json.NewEncoder(w).Encode(map[string]interface{}{"" +
+		"message": "Tokens refreshed successfully",
+		"role":    user.Role,
+		"user_if": user.ID,
+	})
 }
 
 func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
