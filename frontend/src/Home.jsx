@@ -314,14 +314,14 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome, playl
               <PlayIcon />
               Играть
             </button>
-            <div id="homeGenres">
-              <button id="RockGanre">Рок</button>
-              <button id="PopGanre">Поп</button>
-              <button id="MetalGanre">Метал</button>
-              <button id="ClassicalGanre">Классика</button>
-              <button id="HipHopGanre">Хип-Хоп</button>
+            {/* <div id="homeGenres"> */}
+              {/* <button id="RockGanre">Рок</button> */}
+              {/* <button id="PopGanre">Поп</button> */}
+              {/* <button id="MetalGanre">Метал</button> */}
+              {/* <button id="ClassicalGanre">Классика</button> */}
+              {/* <button id="HipHopGanre">Хип-Хоп</button> */}
               {/* <button id="MusicForSexGanre">Music for sex</button> */}
-            </div>
+          {/* </div> */}
           </div>
           <div id="allTracks">
             {tracks && tracks.length >= 1 &&
