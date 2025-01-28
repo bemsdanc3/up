@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LoginForm from './loginForm.jsx'
 import Header from './Header.jsx'
 import Profile from './Profile.jsx'
@@ -10,6 +10,7 @@ import Tracks from './Tracks.jsx'
 function App() {
   const [logged, setLogged] = useState(false);
   const [backHome, setBackHome] = useState(false);
+  const [playlistUpd, setPlaylistUpd] = useState(true);
   const [track, setTrack] = useState(null);
   const [isWavePlaying, setIsWavePlaying] = useState(false); // состояние волны
   const [isTrackPlaying, setIsTrackPlaying] = useState(false); // состояние волны
@@ -80,11 +81,47 @@ function App() {
     setPage('Home');
   }
 
+  const logoutFunc = async () => {
+    try {
+        const response = await fetch(`http://localhost:8080/logout`,{
+          method: 'POST',
+          credentials: 'include',
+          withCredentials: true,
+        });
+        const responseData = await response.json();
+        console.log("responseData");
+        console.log(responseData);
+        if (response.ok) {
+          console.log("salamalekum")
+          setLoginData();
+          setLogged(false);
+          setUserProfile();
+          setPage('');
+        } else {
+          const errorData = await response.text();
+          console.log(errorData.error);
+        }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const playlistUpdFunc = () => {
+    setPlaylistUpd(true);
+    setInterval(() => {
+      setPlaylistUpd(false)
+    }, 0);
+  }
+
+  useEffect(()=>{
+    setPlaylistUpd(false);
+  },[])
+
   return (
     <>
       {!logged && 
         <LoginForm 
-          loginData={(data)=>{setLogged(true); setLoginData(data); console.log(loginData)}}
+          loginData={(data)=>{setLogged(true); setLoginData(data); console.log(loginData); setPage('Home')}}
         />
       }
       {logged && 
@@ -103,6 +140,7 @@ function App() {
           handleTrackClick={playTrack}
           playlistFunc={playlistFunc}
           albumFunc={albumFunc}
+          logout={logoutFunc}
         />
       }
       {logged && page == 'Users' &&
@@ -124,6 +162,7 @@ function App() {
           playlist={playlist}
           album={album}
           backHome={backHome}
+          playlistUpd={playlistUpdFunc}
         />
       }
       {logged && 
@@ -132,6 +171,7 @@ function App() {
           isWavePlaying={isWavePlaying} 
           userProfile={handleProfile} 
           groupInfo={groupInfo}
+          playlistUpd={playlistUpd}
         />
       }
     </>

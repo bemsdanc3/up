@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) {
+function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc, logout }) {
     const [userData, setUserData] = useState({})
     const [tracks, setTracks] = useState([])
     const [albums, setAlbums] = useState([])
@@ -109,8 +109,15 @@ function Profile({ userId, myData, handleTrackClick, playlistFunc, albumFunc }) 
                         <div id="userTextInfo">
                             <h2>{userData.role}</h2>
                             <h1>{userData.login}</h1>
-                            {(myData.role == 'admin' || myData.user_id == userData.id) &&
+                            {(myData.role == 'admin' || myData.user_id == userId) &&
                                 <h2>{userData.email}</h2>
+                            }
+                            {myData.user_id == userId &&
+                                <button
+                                    onClick={logout}
+                                >
+                                    Выйти
+                                </button>
                             }
                         </div>
                     </div>

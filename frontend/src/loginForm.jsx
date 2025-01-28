@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function LoginForm({ loginData }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -62,6 +62,27 @@ function LoginForm({ loginData }) {
       }
     }
   }
+
+  const authTry = async () => {
+    const response = await fetch(`http://localhost:8080/refresh-token`,{
+      method: 'POST',
+      credentials: 'include',
+      withCredentials: true,
+    });
+    const responseData = await response.json();
+    console.log(responseData);
+    if (response.ok) {
+      console.log("salamalekum")
+      loginData(responseData);
+    } else {
+      const errorData = await response.text();
+      setErrText(errorData);
+    }
+  }
+
+  useEffect(()=>{
+    authTry();
+  },[])
 
   const Login = async () => {
     try {
