@@ -16,6 +16,7 @@
     align-items: center;
     margin: 10px;
     width: 30%;
+    max-width: 30%;
 }
 
 #trackinfo img {
@@ -95,7 +96,7 @@
     display: flex;
 }
 
-#player #trackinfo svg {
+#player #trackinfo #trackLikeDiv svg {
     opacity: 0.5;
     margin: 0 20px;
     cursor: pointer;
@@ -103,3 +104,18 @@
       opacity: 1;
     }
   }
+
+#playlistAddTrackDiv {
+    display: flex;
+}
+
+#playlistAddTrackDiv {
+    max-width: 100%;
+    display: flex;
+}
+
+#playlistAddTrackDiv select {
+    max-width: 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

@@ -383,8 +383,12 @@ func (h *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	userID := int(claims["user_id"].(float64))
 
-	user := entities.User{ID: userID}
-	accessToken, refreshToken, err := generateTokens(user)
+	user, err := h.usecase.GetUserByID(userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	}
+	accessToken, refreshToken, err := generateTokens(*user)
 	if err != nil {
 		http.Error(w, "Error generating tokens", http.StatusInternalServerError)
 		return
@@ -411,10 +415,10 @@ func (h *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{"" +
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "Tokens refreshed successfully",
 		"role":    user.Role,
-		"user_if": user.ID,
+		"user_id": user.ID,
 	})
 }
 

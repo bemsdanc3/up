@@ -5,7 +5,7 @@ import PauseIcon from './assets/PauseIcon.svg?react';
 import AddWin from './AddWin.jsx';
 import HeartIcon from './assets/HeartIcon.svg?react';
 
-function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
+function Home({ trackPlay, playWave, loginData, playlist, album, backHome, playlistUpd }) {
   const [tracks, setTracks] = useState([])
   const [tracksLoaded, setTracksLoaded] = useState(false)
   const [playlists, setPlaylists] = useState([])
@@ -222,6 +222,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
         setSelectedPlaylist();
         getAllAlbums();
         getAllPlaylists();
+        playlistUpd();
       } else {
         const errorData = await groupDelRes.json();
         console.log(errorData.error);
@@ -235,7 +236,7 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
     <>
       {isAddWin && 
         <AddWin 
-          groupAdded={()=>{setIsAddWin(false); getAllAlbums(); getAllPlaylists()}}  
+          groupAdded={()=>{setIsAddWin(false); getAllAlbums(); getAllPlaylists(); playlistUpd()}}  
           addInfo={{type: addType, groupId: selectedAlbum || selectedPlaylist}}
           close={()=>setIsAddWin(false)}
           trackAdded={()=>{setIsAddWin(false); getGroupInfo(selectedAlbum || selectedPlaylist, selectedAlbum ? 'album' : 'playlist')}}
@@ -313,14 +314,14 @@ function Home({ trackPlay, playWave, loginData, playlist, album, backHome }) {
               <PlayIcon />
               Играть
             </button>
-            <div id="homeGenres">
-              <button id="RockGanre">Рок</button>
-              <button id="PopGanre">Поп</button>
-              <button id="MetalGanre">Метал</button>
-              <button id="ClassicalGanre">Классика</button>
-              <button id="HipHopGanre">Хип-Хоп</button>
+            {/* <div id="homeGenres"> */}
+              {/* <button id="RockGanre">Рок</button> */}
+              {/* <button id="PopGanre">Поп</button> */}
+              {/* <button id="MetalGanre">Метал</button> */}
+              {/* <button id="ClassicalGanre">Классика</button> */}
+              {/* <button id="HipHopGanre">Хип-Хоп</button> */}
               {/* <button id="MusicForSexGanre">Music for sex</button> */}
-            </div>
+          {/* </div> */}
           </div>
           <div id="allTracks">
             {tracks && tracks.length >= 1 &&

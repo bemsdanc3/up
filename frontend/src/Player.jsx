@@ -7,10 +7,13 @@ import VolumeIcon from './assets/VolumeIcon.svg?react';
 import VolumeOffIcon from './assets/VolumeOffIcon.svg?react';
 import HeartIcon from './assets/HeartIcon.svg?react';
 import HeartFilledIcon from './assets/HeartFilledIcon.svg?react';
+import PlusIcon from './assets/PlusIcon.svg?react';
 
-function Player({ track, userProfile, isWavePlaying, groupInfo }) {
+function Player({ track, userProfile, isWavePlaying, groupInfo, playlistUpd }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [playlistsLoaded, setPlaylistsLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isTrackLiked, setIsTrackLiked] = useState(false);
@@ -120,7 +123,13 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
   useEffect(() => {
     if (track) {
       if (groupInfo) {
-        setPlayingTrackInfo({ ...track, author_id: groupInfo.author_id, author_login: track.author_login || groupInfo.authorLogin, cover: track.cover || groupInfo.cover });
+        setPlayingTrackInfo({ 
+          ...track, 
+          author_id: groupInfo.author_id, 
+          author_login: track.author_login || 
+          groupInfo.authorLogin, 
+          cover: track.cover || 
+          groupInfo.cover });
         isTrackLikedFunc(track.id);
       } else {
         setPlayingTrackInfo(track);
@@ -233,7 +242,67 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
     } catch (error) {
       console.log(error);
     }
-  }   
+  }  
+  
+  const getAllPlaylists = async () => {
+    console.log('getting all tracks');
+    const response = await fetch('http://localhost:8080/playlists/my/all', {
+      method: 'GET',
+      credentials: 'include',
+      withCredentials: true,
+    })
+    // console.log(response);
+    const responseData = await response.json();
+    // console.log(responseData);
+    if (response.ok) {
+      setPlaylists(responseData);
+      setPlaylistsLoaded(true);
+    } else {
+      console.log('жопа');
+    }
+  }
+
+  useEffect(()=>{
+    if (playlistUpd) {
+      getAllPlaylists();
+    }
+  }, [playlistUpd]);
+
+  useEffect(()=>{
+    getAllPlaylists();
+  }, [])
+
+  const playlistAddTrack = async (playlist_id) => {
+    try {
+      const playlistAddTrackSelect = document.getElementById('playlistAddTrackSelect');
+      console.log("playlistAddTrackSelect.value: " + playlistAddTrackSelect.value);
+      console.log("playingTrackInfo.id: " + playingTrackInfo.id)
+      const response = await fetch(`http://localhost:8080/playlists/add/track`,{
+        method: 'POST',
+        credentials: 'include',
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({
+          playlist_id: Number(playlistAddTrackSelect.value),
+          track_id: playingTrackInfo.id,
+        }),
+      });
+      const responseData = await response.json();
+      console.log("responseData");
+      console.log(responseData);
+      if (response.ok) {
+        console.log("salamalekum");
+      } else {
+        const errorData = await response.text();
+        console.log(errorData.error);
+        setErrText(errorData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }    
 
   return (
     <div id="player">
@@ -245,11 +314,31 @@ function Player({ track, userProfile, isWavePlaying, groupInfo }) {
               {playingTrackInfo.title && <span id="tracktitle">{playingTrackInfo.title}</span>}
               <span id="trackauthor" onClick={()=>{userProfile(playingTrackInfo.author_id)}}>{playingTrackInfo.author_login}</span>
             </div>
+            <div id="trackLikeDiv">
             {isTrackLiked && playingTrackInfo.title && 
               <HeartFilledIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
-          }
+            }
             {!isTrackLiked && playingTrackInfo.title && 
               <HeartIcon onClick={()=>{trackLike(playingTrackInfo.id)}}/>
+            }
+            </div>
+            {playingTrackInfo.title && playlists && playlists.length >= 1 && playlists.find((el)=>el.title != 'Любимые треки') &&
+            <div id="playlistAddTrackDiv">
+              <select name="" id="playlistAddTrackSelect">
+                {playlists.map((playlist)=>{
+                  if (playlist.title != 'Любимые треки') {
+                    return (
+                      <option value={playlist.id}>{playlist.title}</option>
+                    )
+                  }
+                })}
+              </select>
+              <button 
+                onClick={playlistAddTrack}
+              >
+                <PlusIcon />
+              </button>
+            </div>
             }
           </>
         }

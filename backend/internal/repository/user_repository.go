@@ -70,9 +70,9 @@ func (r *userRepository) GetUserByEmail(email string) (*entities.User, error) {
 }
 
 func (r *userRepository) GetUserByID(userID int) (*entities.User, error) {
-	query := `SELECT login, email, pfp, role FROM users WHERE id = $1`
+	query := `SELECT id, login, email, pfp, role FROM users WHERE id = $1`
 	var user entities.User
-	err := r.db.QueryRow(query, userID).Scan(&user.Login, &user.Email, &user.PFP, &user.Role)
+	err := r.db.QueryRow(query, userID).Scan(&user.ID, &user.Login, &user.Email, &user.PFP, &user.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err

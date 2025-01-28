@@ -17,6 +17,7 @@ type UserUseCase interface {
 	GetUserProfile(userID int) (*entities.User, error)
 	GetAllUsers() ([]entities.User, error)
 	UpdateUsersRole(userID int, role string) error
+	GetUserByID(userID int) (*entities.User, error)
 }
 
 type userUseCase struct {
@@ -103,4 +104,8 @@ func (u *userUseCase) UpdateUsersRole(userID int, role string) error {
 		return errors.New("invalid role")
 	}
 	return u.repo.UpdateUsersRole(userID, role)
+}
+
+func (u *userUseCase) GetUserByID(userID int) (*entities.User, error) {
+	return u.repo.GetUserByID(userID)
 }
